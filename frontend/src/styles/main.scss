@@ -1,0 +1,42 @@
+// ---------------------------------------------------------------
+// Tema do site do Grupo I2A — sobrescreve variáveis do Bootstrap 5
+// antes de importá-lo, para que as cores valham em todo o sistema.
+// ---------------------------------------------------------------
+$primary: #0f5132;
+$secondary: #495057;
+$info: #0d6efd;
+$body-bg: #ffffff;
+$enable-rounded: true;
+$border-radius: 0.5rem;
+$font-family-sans-serif: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
+
+// ------------------------- utilitários -------------------------
+.i2a-hero {
+  background: linear-gradient(135deg, $primary 0%, darken($primary, 8%) 100%);
+  color: #fff;
+}
+
+.i2a-card-hover {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+  }
+}
+
+.i2a-sidebar {
+  min-height: calc(100vh - 56px);
+  background-color: $gray-100;
+  border-right: 1px solid $gray-300;
+}
+
+.i2a-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
