@@ -5,7 +5,7 @@
   >
     <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
       <h3 class="h6 fw-semibold mb-0">{{ curso.titulo }}</h3>
-      <span class="i2a-meta text-nowrap" :class="aberto ? 'text-primary fw-semibold' : ''">
+      <span class="text-nowrap" :class="aberto ? 'i2a-selo' : 'i2a-meta'">
         {{ aberto ? 'Inscrições abertas' : 'Fechado' }}
       </span>
     </div>

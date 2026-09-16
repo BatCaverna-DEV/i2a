@@ -25,7 +25,7 @@
           <article v-for="vaga in vagas" :key="vaga.id" class="i2a-card p-4">
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
               <h3 class="h6 fw-semibold mb-0">{{ vaga.titulo }}</h3>
-              <span class="badge border text-body-secondary fw-normal">{{ vaga.nivel }}</span>
+              <span class="i2a-selo">{{ vaga.nivel }}</span>
             </div>
 
             <p class="i2a-meta mb-3">{{ vaga.linha }}</p>

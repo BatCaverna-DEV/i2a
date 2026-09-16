@@ -46,7 +46,7 @@
         </p>
 
         <p class="i2a-meta mb-0 d-flex flex-wrap gap-2 align-items-center">
-          <span class="badge border text-body-secondary fw-normal">
+          <span class="i2a-selo">
             {{ TIPO_PRODUCAO[p.tipo] ?? '—' }}
           </span>
           <span>{{ p.veiculo || '—' }} · {{ p.ano ?? 's/d' }}</span>

@@ -24,7 +24,7 @@
 
       <BRow class="g-3">
         <BCol lg="7">
-          <div class="i2a-card p-4 h-100">
+          <div class="i2a-card i2a-card--estatico p-4 h-100">
             <p class="i2a-eyebrow mb-3">Publicações por ano</p>
 
             <EstadoVazio
@@ -41,7 +41,7 @@
                   :style="{
                     height: `${alturaBarra(linha.total)}px`,
                     width: '28px',
-                    backgroundColor: 'var(--bs-primary)'
+                    background: 'linear-gradient(180deg, var(--i2a-azul-500), var(--i2a-azul-700))'
                   }"
                   :title="`${linha.total} publicações em ${linha.ano}`"
                 />
@@ -53,7 +53,7 @@
         </BCol>
 
         <BCol lg="5">
-          <div class="i2a-card p-4 h-100">
+          <div class="i2a-card i2a-card--estatico p-4 h-100">
             <p class="i2a-eyebrow mb-3">Atalhos</p>
             <div class="d-grid gap-2">
               <RouterLink

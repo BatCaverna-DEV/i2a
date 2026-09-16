@@ -2,9 +2,9 @@
 // Estilização padrão do sistema — Bootstrap 5 compilado a partir do
 // SCSS, com o tema do Grupo I2A definido ANTES da importação.
 //
-// Direção visual: claro e minimalista. Fundo branco, muito espaço em
-// branco, tipografia como elemento principal e cor apenas em detalhes
-// (links, botões de ação, estados). Sem gradientes nem sombras fortes.
+// Direção visual: azul acadêmico. Base clara, mas com profundidade —
+// uma faixa escura de abertura, superfícies em azul muito diluído,
+// cartões com borda que ganha cor no hover e detalhes em gradiente.
 //
 // Ordem obrigatória:
 //   1. funções do Sass   2. variáveis do tema
@@ -13,31 +13,39 @@
 @use 'sass:color';
 
 // -------------------------- 1. tema ---------------------------
-// Único acento colorido: o verde institucional, usado com parcimônia.
-$primary: #146c43;
-$secondary: #6b7280;
-$body-bg: #ffffff;
-$body-color: #1f2328;
-$body-secondary-color: #6b7280;
+$azul-900: #0b1f3a; // fundo escuro da abertura
+$azul-800: #12305a;
+$azul-700: #17457f;
+$azul-600: #1d5bb0;
+$azul-500: #2563eb; // ação principal
+$azul-300: #7aa7f0;
+$azul-100: #e8f0fe; // superfícies diluídas
+$azul-050: #f5f8ff;
 
-$border-color: #e5e7eb;
-$border-radius: 0.375rem;
-$border-radius-sm: 0.25rem;
-$border-radius-lg: 0.5rem;
+$primary: $azul-600;
+$secondary: #5b6b80;
+$info: $azul-500;
+
+$body-bg: #ffffff;
+$body-color: #14212e;
+$body-secondary-color: #5b6b80;
+
+$border-color: #dbe3ee;
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
 
 $font-family-sans-serif: 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-$font-size-base: 1rem;
 $line-height-base: 1.6;
-$headings-font-weight: 650;
-$headings-line-height: 1.25;
-$letter-spacing-titulo: -0.02em;
+$headings-font-weight: 680;
+$headings-line-height: 1.22;
 
-// superfícies discretas no lugar de sombras
 $card-border-color: $border-color;
 $card-cap-bg: transparent;
-$card-bg: #ffffff;
+$link-color: $azul-600;
+$link-hover-color: $azul-800;
 
-$navbar-padding-y: 0.9rem;
+$navbar-padding-y: 0.85rem;
 $enable-shadows: false;
 
 // ----------------------- 2. Bootstrap -------------------------
@@ -45,48 +53,126 @@ $enable-shadows: false;
 
 // --------------------- 3. estilos próprios --------------------
 
-// Tipografia: títulos um pouco mais apertados dão ar editorial,
-// que é o que se espera de um site acadêmico.
-h1, h2, h3, .h1, .h2, .h3 {
-  letter-spacing: $letter-spacing-titulo;
+// Tokens reaproveitados nos componentes
+:root {
+  --i2a-azul-900: #{$azul-900};
+  --i2a-azul-700: #{$azul-700};
+  --i2a-azul-600: #{$azul-600};
+  --i2a-azul-500: #{$azul-500};
+  --i2a-azul-300: #{$azul-300};
+  --i2a-azul-100: #{$azul-100};
+  --i2a-azul-050: #{$azul-050};
 }
 
-// Texto de apoio usado em legendas e metadados
+h1, h2, h3, .h1, .h2, .h3 {
+  letter-spacing: -0.022em;
+}
+
 .i2a-meta {
   font-size: 0.8125rem;
   color: $body-secondary-color;
 }
 
-// Rótulo de seção: pequeno, maiúsculo, acima do título
+// Rótulo de seção
 .i2a-eyebrow {
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: $primary;
+  color: $azul-600;
 }
 
-// Superfície neutra para blocos que precisam se destacar do branco
-.i2a-surface {
-  background-color: #fafafa;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-lg;
-}
+// ---------------------- abertura escura -----------------------
+// Faixa azul-noite com um brilho diagonal discreto e uma malha de pontos.
+// É o que tira o site do "branco chapado" sem virar poluição visual.
+.i2a-hero {
+  position: relative;
+  background:
+    radial-gradient(1100px 520px at 12% -10%, rgba(37, 99, 235, 0.42), transparent 62%),
+    radial-gradient(760px 420px at 88% 8%, rgba(23, 69, 127, 0.55), transparent 60%),
+    linear-gradient(160deg, $azul-900 0%, #0a1a31 100%);
+  color: #fff;
+  overflow: hidden;
 
-// Cartão minimalista: borda fina, sem sombra; ao passar o mouse a borda escurece
-.i2a-card {
-  border: 1px solid $border-color;
-  border-radius: $border-radius-lg;
-  background: #fff;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  // malha de pontos
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+    pointer-events: none;
+  }
 
-  &:hover {
-    border-color: color.adjust($primary, $alpha: -0.65);
-    background-color: #fcfdfc;
+  > * {
+    position: relative;
+  }
+
+  .i2a-eyebrow {
+    color: $azul-300;
+  }
+
+  .text-body-secondary {
+    color: rgba(255, 255, 255, 0.72) !important;
   }
 }
 
-// Régua fina usada para separar seções sem pesar
+// Cartão de número dentro da abertura escura
+.i2a-hero-stat {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: $border-radius-lg;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(2px);
+}
+
+// ------------------------ superfícies -------------------------
+.i2a-surface {
+  background-color: $azul-050;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+}
+
+// Cartão: borda que ganha azul e um fio superior no hover
+.i2a-card {
+  position: relative;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  background: #fff;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -1px -1px auto -1px;
+    height: 3px;
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+    background: linear-gradient(90deg, $azul-500, $azul-300);
+    opacity: 0;
+    transition: opacity 0.16s ease;
+  }
+
+  &:hover {
+    border-color: $azul-300;
+    box-shadow: 0 6px 20px rgba(11, 31, 58, 0.07);
+    transform: translateY(-2px);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+// Variante sem o fio superior, para blocos que não são clicáveis
+.i2a-card--estatico:hover {
+  transform: none;
+  box-shadow: none;
+
+  &::after {
+    opacity: 0;
+  }
+}
+
 .i2a-rule {
   height: 1px;
   background: $border-color;
@@ -94,27 +180,51 @@ h1, h2, h3, .h1, .h2, .h3 {
   opacity: 1;
 }
 
-// Navbar clara com apenas uma borda inferior
+// -------------------------- navbar ----------------------------
 .i2a-navbar {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: saturate(180%) blur(8px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: saturate(180%) blur(10px);
   border-bottom: 1px solid $border-color;
+
+  .navbar-brand .i2a-marca {
+    background: linear-gradient(120deg, $azul-700, $azul-500);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 
   .nav-link {
     color: $body-color;
     font-size: 0.9375rem;
+    position: relative;
 
-    &:hover,
+    &:hover {
+      color: $azul-600;
+    }
+
+    // sublinhado fino só na rota ativa
     &.router-link-active {
-      color: $primary;
+      color: $azul-600;
+      font-weight: 600;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: -0.35rem;
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, $azul-500, $azul-300);
+      }
     }
   }
 }
 
-// Barra lateral do painel administrativo
+// ------------------------- painel -----------------------------
 .i2a-sidebar {
   min-height: calc(100vh - 57px);
-  background-color: #fafafa;
+  background-color: $azul-050;
   border-right: 1px solid $border-color;
 
   .nav-link {
@@ -123,23 +233,45 @@ h1, h2, h3, .h1, .h2, .h3 {
     border-radius: $border-radius;
 
     &:hover {
-      background-color: #f1f3f5;
+      background-color: $azul-100;
     }
 
     &.router-link-active {
-      background-color: rgba($primary, 0.08);
-      color: $primary;
+      background: linear-gradient(90deg, rgba($azul-500, 0.14), rgba($azul-500, 0.04));
+      color: $azul-700;
       font-weight: 600;
+      box-shadow: inset 2px 0 0 $azul-500;
     }
   }
 }
 
-// Número grande das estatísticas
+// --------------------------- outros ---------------------------
 .i2a-stat {
   font-size: 2.25rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
+  background: linear-gradient(120deg, $azul-700, $azul-500);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// versão clara, para usar sobre o fundo escuro
+.i2a-stat--claro {
+  background: none;
+  color: #fff;
+}
+
+.i2a-selo {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: $azul-100;
+  color: $azul-700;
+  border: 1px solid rgba($azul-500, 0.18);
 }
 
 .i2a-truncate-3 {
@@ -150,9 +282,15 @@ h1, h2, h3, .h1, .h2, .h3 {
   overflow: hidden;
 }
 
-// Faixa de aviso do modo demonstração (some quando VITE_USE_MOCKS=false)
 .i2a-demo-bar {
-  background: #fff8e1;
-  border-bottom: 1px solid #f3e3b3;
+  background: linear-gradient(90deg, $azul-100, #fff);
+  border-bottom: 1px solid $border-color;
   font-size: 0.8125rem;
+  color: $azul-800;
+}
+
+// Faixa fina de gradiente usada como separador de seções
+.i2a-faixa {
+  height: 3px;
+  background: linear-gradient(90deg, $azul-700, $azul-500, $azul-300);
 }

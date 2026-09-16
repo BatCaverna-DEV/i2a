@@ -1,49 +1,45 @@
 <template>
   <div>
     <!-- ------------------------- abertura ------------------------- -->
-    <section class="pt-5 pb-5">
-      <BContainer class="py-lg-4">
-        <BRow>
-          <BCol lg="9" xl="8">
+    <section class="i2a-hero py-5">
+      <BContainer class="py-lg-5">
+        <BRow class="align-items-center g-5">
+          <BCol lg="7">
             <p class="i2a-eyebrow mb-3">{{ APP.instituicao }} · {{ APP.campus }}</p>
-            <h1 class="display-5 fw-bold mb-3" style="max-width: 20ch">
+            <h1 class="display-5 fw-bold mb-3" style="max-width: 18ch">
               Inteligência Artificial e Aplicações
             </h1>
-            <p class="fs-5 text-body-secondary mb-4" style="max-width: 62ch">
+            <p class="fs-5 text-body-secondary mb-4" style="max-width: 58ch">
               O I2A reúne professores e estudantes do IFMA em torno de aprendizagem de máquina
               e suas aplicações — da saúde ao sensoriamento remoto, do ensino à gestão pública.
             </p>
             <div class="d-flex flex-wrap gap-2">
-              <RouterLink :to="{ name: 'projetos' }" class="btn btn-primary">
+              <RouterLink :to="{ name: 'projetos' }" class="btn btn-primary px-4">
                 Ver projetos
               </RouterLink>
-              <RouterLink :to="{ name: 'participe' }" class="btn btn-outline-secondary">
+              <RouterLink :to="{ name: 'participe' }" class="btn btn-outline-light px-4">
                 Participe do grupo
               </RouterLink>
             </div>
+          </BCol>
+
+          <BCol lg="5">
+            <BRow class="g-3">
+              <BCol v-for="n in numeros" :key="n.rotulo" cols="6">
+                <div class="i2a-hero-stat p-3 p-xl-4 h-100">
+                  <p class="i2a-stat i2a-stat--claro mb-1">{{ n.valor }}</p>
+                  <p class="small mb-0" style="color: rgba(255, 255, 255, 0.7)">
+                    {{ n.rotulo }}
+                  </p>
+                </div>
+              </BCol>
+            </BRow>
           </BCol>
         </BRow>
       </BContainer>
     </section>
 
-    <!-- ------------------------- números -------------------------- -->
-    <section class="border-top border-bottom">
-      <BContainer>
-        <BRow class="py-4 text-center text-md-start">
-          <BCol
-            v-for="(n, i) in numeros"
-            :key="n.rotulo"
-            cols="6"
-            md="3"
-            class="py-3"
-            :class="{ 'border-start': i > 0 }"
-          >
-            <p class="i2a-stat mb-1">{{ n.valor }}</p>
-            <p class="i2a-meta mb-0">{{ n.rotulo }}</p>
-          </BCol>
-        </BRow>
-      </BContainer>
-    </section>
+    <div class="i2a-faixa" />
 
     <!-- --------------------- linhas de pesquisa ------------------- -->
     <section class="py-5">
@@ -62,10 +58,10 @@
               :to="{ name: 'pesquisadores', query: { linha: linha.id } }"
               class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
             >
-              <h3 class="h6 fw-semibold mb-2">{{ linha.descricao }}</h3>
-              <p class="i2a-meta mb-0">
+              <h3 class="h6 fw-semibold mb-3">{{ linha.descricao }}</h3>
+              <span class="i2a-selo">
                 {{ linha.total_pesquisadores ?? 0 }} pesquisador(es)
-              </p>
+              </span>
             </RouterLink>
           </BCol>
         </BRow>
@@ -73,11 +69,11 @@
     </section>
 
     <!-- ------------------- publicações recentes ------------------- -->
-    <section class="pb-5">
-      <BContainer class="pb-lg-3">
+    <section class="py-5" style="background-color: var(--i2a-azul-050)">
+      <BContainer class="py-lg-3">
         <SecaoTitulo eyebrow="Produção" titulo="Publicações recentes">
           <template #acao>
-            <RouterLink :to="{ name: 'producoes' }" class="btn btn-sm btn-outline-secondary">
+            <RouterLink :to="{ name: 'producoes' }" class="btn btn-sm btn-outline-primary">
               Ver todas
             </RouterLink>
           </template>
@@ -85,27 +81,31 @@
 
         <CarregandoBloco v-if="carregando" />
 
-        <ul v-else class="list-unstyled d-grid gap-3 mb-0">
-          <li v-for="pub in publicacoes" :key="pub.id" class="border-bottom pb-3">
-            <p class="fw-semibold mb-1">{{ pub.titulo }}</p>
-            <p class="i2a-meta mb-0">
-              {{ pub.autores?.map((a) => a.nome).join('; ') }} ·
-              {{ pub.veiculo }} · {{ pub.ano }}
-            </p>
-          </li>
-        </ul>
+        <BRow v-else class="g-3">
+          <BCol v-for="pub in publicacoes" :key="pub.id" md="6">
+            <div class="i2a-card i2a-card--estatico h-100 p-4">
+              <p class="fw-semibold mb-2">{{ pub.titulo }}</p>
+              <p class="i2a-meta mb-2">
+                {{ pub.autores?.map((a) => a.nome).join('; ') }}
+              </p>
+              <p class="i2a-meta mb-0">
+                <span class="i2a-selo me-2">{{ pub.ano }}</span>{{ pub.veiculo }}
+              </p>
+            </div>
+          </BCol>
+        </BRow>
       </BContainer>
     </section>
 
     <!-- ------------------------- chamadas ------------------------- -->
-    <section class="pb-5">
-      <BContainer class="pb-lg-4">
+    <section class="py-5">
+      <BContainer class="py-lg-3">
         <BRow class="g-3">
           <BCol md="6">
-            <div class="i2a-surface p-4 h-100 d-flex flex-column">
+            <div class="i2a-surface p-4 p-lg-5 h-100 d-flex flex-column">
               <p class="i2a-eyebrow mb-2">Formação</p>
               <h3 class="h5 fw-semibold mb-2">Cursos abertos à comunidade</h3>
-              <p class="text-body-secondary small flex-grow-1">
+              <p class="text-body-secondary small flex-grow-1 mb-4">
                 {{
                   cursosAbertos.length
                     ? `${cursosAbertos.length} curso(s) com inscrições abertas agora.`
@@ -113,7 +113,7 @@
                 }}
               </p>
               <div>
-                <RouterLink :to="{ name: 'cursos' }" class="btn btn-sm btn-outline-secondary">
+                <RouterLink :to="{ name: 'cursos' }" class="btn btn-sm btn-outline-primary">
                   Ver cursos
                 </RouterLink>
               </div>
@@ -121,10 +121,10 @@
           </BCol>
 
           <BCol md="6">
-            <div class="i2a-surface p-4 h-100 d-flex flex-column">
+            <div class="i2a-surface p-4 p-lg-5 h-100 d-flex flex-column">
               <p class="i2a-eyebrow mb-2">Oportunidades</p>
               <h3 class="h5 fw-semibold mb-2">Faça iniciação científica no I2A</h3>
-              <p class="text-body-secondary small flex-grow-1">
+              <p class="text-body-secondary small flex-grow-1 mb-4">
                 Bolsas de PIBIC e PIBIT, voluntariado e projetos de extensão abertos a
                 estudantes do IFMA.
               </p>

@@ -3,7 +3,7 @@
     <BContainer>
       <nav class="navbar navbar-expand-lg p-0">
         <RouterLink :to="{ name: 'home' }" class="navbar-brand d-flex align-items-center gap-2">
-          <span class="fw-bold">{{ APP.sigla }}</span>
+          <span class="fw-bold i2a-marca">{{ APP.sigla }}</span>
           <span class="i2a-meta d-none d-sm-inline">Inteligência Artificial e Aplicações</span>
         </RouterLink>
 
@@ -26,7 +26,7 @@
             <li class="nav-item ms-lg-2 my-2 my-lg-0">
               <RouterLink
                 :to="{ name: 'admin-login' }"
-                class="btn btn-outline-secondary btn-sm"
+                class="btn btn-outline-primary btn-sm"
                 @click="aberto = false"
               >
                 Entrar
