@@ -163,7 +163,7 @@ no `sync`. Comportamento ao apagar o registro-pai:
 
 | Coluna | Valores |
 |---|---|
-| `usuarios.categoria` | 1 Administrador · 2 Coordenador · 3 Pesquisador |
+| `usuarios.categoria` | 1 Administrador · 2 Pesquisador · 3 Orientando |
 | `usuarios.status` | 0 Inativo · 1 Ativo · 2 Bloqueado |
 | `projetos.status` | 0 Em elaboração · 1 Em andamento · 2 Concluído · 3 Cancelado |
 | `projetos.tipo` | 1 Pesquisa · 2 Extensão · 3 Desenvolvimento · 4 Ensino |
@@ -232,13 +232,46 @@ que quiser. O que o torna confiável é a assinatura do Google, conferida em
 conteúdo do token sem essa verificação deixaria qualquer um entrar como
 administrador.
 
-### Autorização
+### Autorização: três papéis
+
+| Papel | O que pode fazer |
+|---|---|
+| **1 Administrador** | tudo: todos os cadastros, linhas de pesquisa e contas de acesso |
+| **2 Pesquisador** | gerencia o que é dele — projetos que coordena, publicações de que é autor, cursos e titulações — e cadastra os próprios orientandos |
+| **3 Orientando** | somente leitura, e apenas dos projetos em que participa |
+
+O papel é escolhido no cadastro do pesquisador e vive na coluna
+`usuarios.categoria`.
+
+**Como cada papel enxerga as listagens** (`escopo` do `crudFactory`):
+
+| Recurso | Administrador | Pesquisador | Orientando |
+|---|---|---|---|
+| Projetos | todos | os que coordena | os que participa (via `orientacacoes`) |
+| Publicações | todas | as de que é autor (via `autores`) | as de que é autor |
+| Cursos, titulações | todos | os próprios | os próprios |
+| Pesquisadores | todos | todos (leitura) | — sem acesso |
+| Linhas de pesquisa | CRUD | leitura | — sem acesso |
+| Usuários | CRUD | — | — |
 
 | Middleware | Efeito |
 |---|---|
 | `autenticar` | exige access token válido e usuário ativo |
 | `autorizar(...categorias)` | restringe a rota a determinadas categorias |
-| `donoOuAdmin(campo)` | pesquisador só manipula registros vinculados a ele; admin e coordenador passam |
+| `somenteAdmin` | atalho para `autorizar(ADMINISTRADOR)` |
+| `bloquearOrientando` | barra POST, PUT, PATCH e DELETE vindos de um orientando |
+| `donoOuAdmin(campo)` | em POST força o vínculo ao próprio pesquisador; em PUT/DELETE a posse é conferida no controller, que já carregou o registro |
+
+O frontend esconde o que o papel não pode usar, mas **quem decide é a API** —
+esconder botão não é controle de acesso.
+
+### Pesquisador e conta de acesso nascem juntos
+
+`POST /admin/pesquisadores` cria o pesquisador e o usuário na mesma transação.
+Se a conta falhar (e-mail repetido, por exemplo), o pesquisador não fica órfão
+no banco. O `username` é derivado do e-mail, com sufixo numérico em caso de
+colisão. Apagar o pesquisador apaga a conta junto — manter a conta viva daria
+acesso a alguém que não está mais no grupo.
 
 ---
 

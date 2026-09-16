@@ -2,7 +2,7 @@
   <section>
     <SecaoTitulo eyebrow="Cadastro" :titulo="titulo" :descricao="subtitulo" tag="h1">
       <template #acao>
-        <BButton variant="primary" size="sm" @click="abrirNovo">
+        <BButton v-if="podeEscrever" variant="primary" size="sm" @click="abrirNovo">
           <i class="bi bi-plus-lg me-1" />Novo
         </BButton>
       </template>
@@ -31,7 +31,11 @@
       <EstadoVazio
         v-else-if="itens.length === 0"
         titulo="Nenhum registro"
-        :descricao="`Cadastre o primeiro item em ${titulo.toLowerCase()}.`"
+        :descricao="
+          podeEscrever
+            ? `Cadastre o primeiro item em ${titulo.toLowerCase()}.`
+            : 'Nada por aqui para o seu perfil.'
+        "
       />
 
       <BTable
@@ -49,7 +53,7 @@
         </template>
 
         <template #cell(acoes)="{ item }">
-          <div class="text-end text-nowrap">
+          <div v-if="podeEscrever" class="text-end text-nowrap">
             <BButton size="sm" variant="outline-secondary" class="me-1" @click="abrirEdicao(item)">
               <i class="bi bi-pencil" />
             </BButton>
@@ -109,6 +113,7 @@ import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import { mensagemDeErro } from '@/services/http';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({
   titulo: { type: String, required: true },
@@ -123,11 +128,17 @@ const props = defineProps({
   /** filtros extras enviados na listagem */
   filtrosExtras: { type: Object, default: () => ({}) },
   /** transforma o item antes de preencher o formulário de edição */
-  paraFormulario: { type: Function, default: (item) => ({ ...item }) }
+  paraFormulario: { type: Function, default: (item) => ({ ...item }) },
+  /** força a tela a ficar somente leitura, além da regra do papel */
+  somenteLeitura: { type: Boolean, default: false }
 });
 
 const slots = useSlots();
 const toast = useToast();
+const auth = useAuthStore();
+
+// A API é quem manda: aqui só escondemos o que ela recusaria de qualquer jeito.
+const podeEscrever = computed(() => auth.podeEscrever && !props.somenteLeitura);
 
 const itens = ref([]);
 const meta = reactive({ total: 0, page: 1, limit: 20, totalPages: 1 });
@@ -141,7 +152,9 @@ const salvando = ref(false);
 const erroForm = ref('');
 const form = reactive(props.formularioPadrao());
 
-const camposTabela = computed(() => [...props.campos, { key: 'acoes', label: '', class: 'text-end' }]);
+const camposTabela = computed(() =>
+  podeEscrever.value ? [...props.campos, { key: 'acoes', label: '', class: 'text-end' }] : props.campos
+);
 const slotsDeCelula = computed(() => Object.keys(slots).filter((n) => n.startsWith('cell(')));
 
 async function recarregar(novaPagina = pagina.value) {

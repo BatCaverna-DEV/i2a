@@ -9,11 +9,19 @@ export const linhaSchema = z.object({
 });
 
 /* ----------------------- pesquisador ------------------------ */
+// `categoria` define o tipo de usuário criado junto com o pesquisador:
+// 1 Administrador · 2 Pesquisador · 3 Orientando
 export const pesquisadorSchema = z.object({
   nome: z.string().min(3).max(100),
   email: z.string().email('E-mail inválido.').max(100),
   matricula: opcional(z.string().max(20)),
-  linhas_id: opcional(z.string().uuid('Identificador inválido.'))
+  linhas_id: opcional(z.string().uuid('Identificador inválido.')),
+  categoria: z.coerce
+    .number()
+    .int()
+    .min(1, 'Tipo de usuário inválido.')
+    .max(3, 'Tipo de usuário inválido.')
+    .default(3)
 });
 
 export const pesquisadorUpdateSchema = pesquisadorSchema.partial();

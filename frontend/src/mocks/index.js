@@ -5,13 +5,22 @@
 import * as dados from './dados.js';
 import { criarRepositorio, paginar, filtrar, atraso } from './repositorio.js';
 
+/**
+ * Vincula a cada pesquisador de exemplo a conta de acesso correspondente,
+ * do mesmo jeito que a API faz no include de `usuarios`.
+ */
+const pesquisadoresComConta = dados.pesquisadores.map((p) => ({
+  ...p,
+  usuarios: dados.usuarios.filter((u) => u.pesquisador_id === p.id)
+}));
+
 /* ------------------------- repositórios --------------------------- */
 const repo = {
   linhas: criarRepositorio(dados.linhas, {
     camposBusca: ['descricao'],
     ordenar: (a, b) => a.descricao.localeCompare(b.descricao)
   }),
-  pesquisadores: criarRepositorio(dados.pesquisadores, {
+  pesquisadores: criarRepositorio(pesquisadoresComConta, {
     camposBusca: ['nome', 'email', 'matricula'],
     filtros: ['linhas_id'],
     ordenar: (a, b) => a.nome.localeCompare(b.nome)
@@ -151,7 +160,40 @@ export const admin = {
 
   pesquisadores: {
     ...repo.pesquisadores,
-    completo: (id) => publico.pesquisador(id)
+    completo: (id) => publico.pesquisador(id),
+
+    /** Espelha o backend: cadastrar pesquisador cria a conta de acesso junto. */
+    async criar(payload) {
+      const { categoria = 3, ...dadosPesquisador } = payload;
+      const pesquisador = await repo.pesquisadores.criar(dadosPesquisador);
+
+      const conta = await repo.usuarios.criar({
+        username: String(payload.email ?? '').split('@')[0],
+        email: payload.email,
+        nome: payload.nome,
+        categoria,
+        status: 1,
+        ultimo_acesso: null,
+        pesquisador_id: pesquisador.id
+      });
+
+      return repo.pesquisadores.atualizar(pesquisador.id, { usuarios: [conta] });
+    },
+
+    async atualizar(id, payload) {
+      const { categoria, ...dadosPesquisador } = payload;
+      const atual = await repo.pesquisadores.buscar(id);
+      const conta = atual.usuarios?.[0];
+
+      if (conta && categoria !== undefined) {
+        await repo.usuarios.atualizar(conta.id, { categoria, email: payload.email });
+        return repo.pesquisadores.atualizar(id, {
+          ...dadosPesquisador,
+          usuarios: [{ ...conta, categoria, email: payload.email }]
+        });
+      }
+      return repo.pesquisadores.atualizar(id, dadosPesquisador);
+    }
   },
 
   projetos: {

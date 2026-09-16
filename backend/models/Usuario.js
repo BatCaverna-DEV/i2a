@@ -16,11 +16,25 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
-/** Categorias possíveis do usuário (coluna `categoria`). */
+/**
+ * Categorias possíveis do usuário (coluna `categoria`).
+ *
+ *  1 ADMINISTRADOR — gerencia todos os dados do sistema
+ *  2 PESQUISADOR   — gerencia apenas o que é dele (projetos, publicações,
+ *                    cursos, titulações) e cadastra os próprios orientandos
+ *  3 ORIENTANDO    — só visualiza os projetos em que está envolvido
+ */
 export const CATEGORIA_USUARIO = Object.freeze({
-  ADMIN: 1, // acesso total
-  COORDENADOR: 2, // gerencia projetos, cursos e pesquisadores
-  PESQUISADOR: 3 // gerencia apenas os próprios registros
+  ADMINISTRADOR: 1,
+  PESQUISADOR: 2,
+  ORIENTANDO: 3
+});
+
+/** Rótulos para mensagens de erro e telas. */
+export const ROTULO_CATEGORIA = Object.freeze({
+  [1]: 'Administrador',
+  [2]: 'Pesquisador',
+  [3]: 'Orientando'
 });
 
 /** Situações possíveis do usuário (coluna `status`). */
@@ -82,7 +96,7 @@ const Usuario = sequelize.define(
     categoria: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: CATEGORIA_USUARIO.PESQUISADOR,
+      defaultValue: CATEGORIA_USUARIO.ORIENTANDO,
       validate: {
         isIn: { args: [Object.values(CATEGORIA_USUARIO)], msg: 'Categoria inválida.' }
       }

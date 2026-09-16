@@ -101,7 +101,7 @@ async function popular() {
   await Usuario.create({
     username,
     email,
-    categoria: CATEGORIA_USUARIO.ADMIN,
+    categoria: CATEGORIA_USUARIO.ADMINISTRADOR,
     status: STATUS_USUARIO.ATIVO,
     pesquisador_id: pesquisador.id
   });

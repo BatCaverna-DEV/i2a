@@ -127,7 +127,7 @@ async function passo5_garantirAdministrador() {
   const existente = await Usuario.findOne({ where: { email: emailAdmin } });
 
   if (existente) {
-    existente.categoria = CATEGORIA_USUARIO.ADMIN;
+    existente.categoria = CATEGORIA_USUARIO.ADMINISTRADOR;
     existente.status = STATUS_USUARIO.ATIVO;
     await existente.save();
     console.log(`[migrar] "${emailAdmin}" confirmado como administrador ativo`);
@@ -149,7 +149,7 @@ async function passo5_garantirAdministrador() {
   await Usuario.create({
     username,
     email: emailAdmin,
-    categoria: CATEGORIA_USUARIO.ADMIN,
+    categoria: CATEGORIA_USUARIO.ADMINISTRADOR,
     status: STATUS_USUARIO.ATIVO,
     pesquisador_id: pesquisador.id
   });

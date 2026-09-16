@@ -13,9 +13,9 @@ import { CHAVE_ACCESS, CHAVE_REFRESH, mensagemDeErro } from '@/services/http';
 
 /** Espelha CATEGORIA_USUARIO do backend. */
 export const CATEGORIA = Object.freeze({
-  ADMIN: 1,
-  COORDENADOR: 2,
-  PESQUISADOR: 3
+  ADMINISTRADOR: 1,
+  PESQUISADOR: 2,
+  ORIENTANDO: 3
 });
 
 export const useAuthStore = defineStore('auth', () => {
@@ -25,10 +25,15 @@ export const useAuthStore = defineStore('auth', () => {
   const erro = ref('');
 
   const autenticado = computed(() => Boolean(accessToken.value && usuario.value));
-  const ehAdmin = computed(() => usuario.value?.categoria === CATEGORIA.ADMIN);
-  const ehGestor = computed(() =>
-    [CATEGORIA.ADMIN, CATEGORIA.COORDENADOR].includes(usuario.value?.categoria)
-  );
+  const ehAdmin = computed(() => usuario.value?.categoria === CATEGORIA.ADMINISTRADOR);
+  const ehPesquisador = computed(() => usuario.value?.categoria === CATEGORIA.PESQUISADOR);
+  const ehOrientando = computed(() => usuario.value?.categoria === CATEGORIA.ORIENTANDO);
+
+  /** Orientando não escreve nada — usado para esconder botões de ação. */
+  const podeEscrever = computed(() => !ehOrientando.value);
+
+  /** Só o administrador cadastra outros administradores e pesquisadores. */
+  const podeGerenciarTudo = computed(() => ehAdmin.value);
 
   /** Nome curto para saudações e para o menu da conta. */
   const nomeExibido = computed(
@@ -93,7 +98,10 @@ export const useAuthStore = defineStore('auth', () => {
     erro,
     autenticado,
     ehAdmin,
-    ehGestor,
+    ehPesquisador,
+    ehOrientando,
+    podeEscrever,
+    podeGerenciarTudo,
     nomeExibido,
     entrarComGoogle,
     restaurarSessao,

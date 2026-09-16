@@ -2,11 +2,19 @@
  * Fábrica de controllers CRUD. Evita repetir listar/buscar/criar/atualizar/remover
  * em cada recurso — os controllers concretos só declaram o model, os includes
  * e os campos pesquisáveis, e sobrescrevem o que for específico.
+ *
+ * Duas opções cuidam das permissões por papel:
+ *
+ *   escopo(req)   devolve um `where` extra aplicado à listagem, para que cada
+ *                 perfil enxergue apenas o que lhe cabe;
+ *   campoDono     nome da coluna que aponta para o pesquisador dono do
+ *                 registro; quando informado, PUT e DELETE exigem posse.
  */
 import { Op } from 'sequelize';
 
 import ApiError from '../helpers/ApiError.js';
 import asyncHandler from '../helpers/asyncHandler.js';
+import { exigirPosse } from '../helpers/auth.js';
 import { parsePaginacao, montarResposta } from '../helpers/paginacao.js';
 
 export default function crudFactory({
@@ -15,9 +23,12 @@ export default function crudFactory({
   includes = [],
   camposBusca = [],
   ordenacaoPadrao = [['id', 'ASC']],
-  filtrosPermitidos = []
+  filtrosPermitidos = [],
+  escopo = null,
+  campoDono = null
 }) {
-  function montarWhere(query) {
+  async function montarWhere(req) {
+    const { query } = req;
     const where = {};
 
     if (query.q && camposBusca.length > 0) {
@@ -30,13 +41,16 @@ export default function crudFactory({
       }
     }
 
+    // o escopo do papel tem a última palavra e não pode ser burlado por query
+    if (escopo) Object.assign(where, (await escopo(req)) ?? {});
+
     return where;
   }
 
   const listar = asyncHandler(async (req, res) => {
     const { page, limit, offset } = parsePaginacao(req.query);
     const { rows, count } = await model.findAndCountAll({
-      where: montarWhere(req.query),
+      where: await montarWhere(req),
       include: includes,
       order: ordenacaoPadrao,
       limit,
@@ -61,6 +75,9 @@ export default function crudFactory({
   const atualizar = asyncHandler(async (req, res) => {
     const registro = await model.findByPk(req.params.id);
     if (!registro) throw ApiError.notFound(`${nome} não encontrado.`);
+
+    if (campoDono) exigirPosse(req.usuario, registro, campoDono);
+
     await registro.update(req.body);
     const completo = await model.findByPk(registro.id, { include: includes });
     res.json(completo);
@@ -69,6 +86,9 @@ export default function crudFactory({
   const remover = asyncHandler(async (req, res) => {
     const registro = await model.findByPk(req.params.id);
     if (!registro) throw ApiError.notFound(`${nome} não encontrado.`);
+
+    if (campoDono) exigirPosse(req.usuario, registro, campoDono);
+
     await registro.destroy();
     res.status(204).send();
   });

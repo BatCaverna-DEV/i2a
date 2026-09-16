@@ -113,7 +113,7 @@ const routes = [
         path: 'usuarios',
         name: 'admin-usuarios',
         component: () => import('@/views/admin/UsuariosAdmin.vue'),
-        meta: { categorias: [CATEGORIA.ADMIN] }
+        meta: { categorias: [CATEGORIA.ADMINISTRADOR] }
       },
       {
         path: 'perfil',
