@@ -1,16 +1,19 @@
 /**
- * Credenciais de acesso à área administrativa (tabela `usuarios` do DER).
+ * Contas com acesso à área administrativa (tabela `usuarios` do DER).
  *
- * OBSERVAÇÃO SOBRE O DER: o diagrama original traz apenas
- * id, username, categoria, status e pesquisador_id. Como o sistema exige
- * autenticação JWT com Google Authenticator, três colunas foram acrescentadas:
- *   - senha_hash    -> hash bcrypt da senha
- *   - totp_secret   -> segredo base32 do Google Authenticator
- *   - totp_ativo    -> se o segundo fator já foi confirmado pelo usuário
- * Elas nunca são devolvidas pela API (ver o `defaultScope` abaixo).
+ * A autenticação é feita exclusivamente por conta Google — o sistema não
+ * armazena senha nenhuma. O que identifica o usuário é o `google_sub`
+ * (identificador estável da conta Google) e, na primeira entrada, o `email`.
+ *
+ * OBSERVAÇÃO SOBRE O DER: o diagrama traz apenas id, username, categoria,
+ * status e pesquisador_id. Foram acrescentadas quatro colunas exigidas pelo
+ * login com Google:
+ *   - email       -> chave usada para liberar o acesso (pré-cadastro)
+ *   - google_sub  -> "subject" do token do Google, preenchido no 1º login
+ *   - nome        -> nome exibido, vindo do perfil Google
+ *   - avatar_url  -> foto do perfil Google
  */
 import { DataTypes } from 'sequelize';
-import bcrypt from 'bcryptjs';
 import { sequelize } from '../config/database.js';
 
 /** Categorias possíveis do usuário (coluna `categoria`). */
@@ -40,33 +43,48 @@ const Usuario = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: { msg: 'Já existe um usuário com esse nome.' },
+      comment: 'identificador curto, usado na interface',
       validate: {
         notEmpty: { msg: 'O nome de usuário é obrigatório.' },
         len: { args: [3, 100], msg: 'O nome de usuário deve ter ao menos 3 caracteres.' }
       }
     },
-    senha_hash: {
-      type: DataTypes.STRING(60), // bcrypt gera sempre 60 caracteres
-      allowNull: false
-    },
-    totp_secret: {
-      type: DataTypes.STRING(64),
-      allowNull: true
-    },
-    totp_ativo: {
-      type: DataTypes.BOOLEAN,
+    email: {
+      type: DataTypes.STRING(150),
       allowNull: false,
-      defaultValue: false
+      unique: { msg: 'Já existe um usuário com esse e-mail.' },
+      comment: 'e-mail da conta Google autorizada a entrar',
+      validate: {
+        notEmpty: { msg: 'O e-mail é obrigatório.' },
+        isEmail: { msg: 'E-mail inválido.' }
+      }
+    },
+    google_sub: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+      unique: { msg: 'Esta conta Google já está vinculada a outro usuário.' },
+      comment: 'subject do ID token do Google; preenchido no primeiro login'
+    },
+    nome: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+      comment: 'nome vindo do perfil Google'
+    },
+    avatar_url: {
+      type: DataTypes.STRING(400),
+      allowNull: true,
+      comment: 'foto do perfil Google'
+    },
+    ultimo_acesso: {
+      type: DataTypes.DATE,
+      allowNull: true
     },
     categoria: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: CATEGORIA_USUARIO.PESQUISADOR,
       validate: {
-        isIn: {
-          args: [Object.values(CATEGORIA_USUARIO)],
-          msg: 'Categoria inválida.'
-        }
+        isIn: { args: [Object.values(CATEGORIA_USUARIO)], msg: 'Categoria inválida.' }
       }
     },
     status: {
@@ -85,36 +103,25 @@ const Usuario = sequelize.define(
   {
     tableName: 'usuarios',
     defaultScope: {
-      attributes: { exclude: ['senha_hash', 'totp_secret'] }
+      attributes: { exclude: ['google_sub'] }
     },
     scopes: {
       // usado apenas pelo fluxo de login
-      comCredenciais: { attributes: { include: ['senha_hash', 'totp_secret'] } }
+      completo: { attributes: { include: ['google_sub'] } }
     },
     hooks: {
       beforeValidate(usuario) {
         if (usuario.username) usuario.username = usuario.username.trim().toLowerCase();
+        if (usuario.email) usuario.email = usuario.email.trim().toLowerCase();
       }
     }
   }
 );
 
-/** Define a senha já aplicando o hash bcrypt. */
-Usuario.prototype.definirSenha = async function definirSenha(senhaPura) {
-  this.senha_hash = await bcrypt.hash(senhaPura, 10);
-};
-
-/** Compara uma senha em texto puro com o hash armazenado. */
-Usuario.prototype.verificarSenha = function verificarSenha(senhaPura) {
-  if (!this.senha_hash) return Promise.resolve(false);
-  return bcrypt.compare(senhaPura, this.senha_hash);
-};
-
-/** Remove os campos sensíveis de qualquer serialização do model. */
+/** Nunca expõe o identificador da conta Google nas respostas da API. */
 Usuario.prototype.toJSON = function toJSON() {
   const valores = { ...this.get() };
-  delete valores.senha_hash;
-  delete valores.totp_secret;
+  delete valores.google_sub;
   return valores;
 };
 

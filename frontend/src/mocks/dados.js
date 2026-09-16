@@ -353,27 +353,30 @@ export const usuarios = [
   {
     id: '77777777-7777-4777-8777-000000000001',
     username: 'admin',
+    email: pesquisadores[0].email,
     categoria: 1,
     status: 1,
-    totp_ativo: true,
+    ultimo_acesso: new Date().toISOString(),
     pesquisador_id: pesquisadores[0].id,
     pesquisador: { ...p(0), email: pesquisadores[0].email }
   },
   {
     id: '77777777-7777-4777-8777-000000000002',
     username: 'ana.lima',
+    email: pesquisadores[1].email,
     categoria: 2,
     status: 1,
-    totp_ativo: true,
+    ultimo_acesso: new Date().toISOString(),
     pesquisador_id: pesquisadores[1].id,
     pesquisador: { ...p(1), email: pesquisadores[1].email }
   },
   {
     id: '77777777-7777-4777-8777-000000000003',
     username: 'eduardo.lopes',
+    email: pesquisadores[4].email,
     categoria: 3,
     status: 0,
-    totp_ativo: false,
+    ultimo_acesso: null,
     pesquisador_id: pesquisadores[4].id,
     pesquisador: { ...p(4), email: pesquisadores[4].email }
   }

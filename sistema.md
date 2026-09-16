@@ -28,7 +28,7 @@ Navegador
 ```
 
 - **Backend:** Node.js (ES6 Modules) + Express + Sequelize + MariaDB
-- **Autenticação:** JWT em duas etapas, com segundo fator TOTP (Google Authenticator)
+- **Autenticação:** login com conta Google (Google Identity Services); a API valida o ID token e emite os próprios JWT. Sem senha.
 - **Frontend:** Vue 3 (Composition API, `<script setup>`) + Vite + Vue Router + Pinia + bootstrap-vue-next (Bootstrap 5)
 - **Segredos:** arquivo `.env` em cada lado, nunca versionado (veja os `.env.example`)
 
@@ -84,9 +84,9 @@ i2a/
 │       ├── validate.js        ← validação com Zod
 │       ├── rateLimit.js       ← proteção das rotas de login
 │       ├── errorHandler.js    ← resposta de erro padronizada + 404
-│       ├── authService.js     ← regras do login em duas etapas
-│       ├── tokenService.js    ← emissão/verificação dos JWT
-│       ├── totpService.js     ← Google Authenticator (segredo, QR Code, verificação)
+│       ├── googleService.js   ← valida o ID token do Google
+│       ├── authService.js     ← whitelist, vínculo da conta e emissão dos tokens
+│       ├── tokenService.js    ← emissão/verificação dos JWT da aplicação
 │       ├── authSchemas.js  ├── entidadeSchemas.js   ← schemas Zod
 │       ├── ApiError.js     ├── asyncHandler.js      └── paginacao.js
 │       └── seed.js            ← cria as tabelas e popula os dados iniciais
@@ -106,14 +106,15 @@ i2a/
         │   ├── PublicLayout.vue ← navbar + rodapé do site
         │   └── AdminLayout.vue  ← navbar + sidebar do painel
         ├── views/
-        │   ├── publico/         ← Home, Sobre, Pesquisadores, Projetos, Cursos, Produções
+        │   ├── publico/         ← Home, Sobre, Equipe, Projetos, Publicações, Cursos, Participe, Contato
         │   ├── admin/           ← Login, Dashboard e um CRUD por entidade
         │   └── NotFound.vue
+        ├── mocks/               ← dados de exemplo (VITE_USE_MOCKS)
         ├── components/
-        │   ├── comum/           ← PageHeader, CarregandoBloco, EstadoVazio
+        │   ├── comum/           ← SecaoTitulo, CarregandoBloco, EstadoVazio, BarraDemo
         │   ├── publico/         ← TheNavbar, TheFooter, CursoCard
-        │   └── admin/           ← AdminSidebar, CrudView (tabela + modal genéricos)
-        ├── stores/auth.js       ← sessão, etapas do login, categorias
+        │   └── admin/           ← AdminSidebar, CrudView, BotaoGoogle
+        ├── stores/auth.js       ← sessão e categorias
         ├── services/
         │   ├── http.js          ← axios + interceptors (token e refresh automático)
         │   ├── authService.js   ├── adminService.js  └── publicoService.js
@@ -136,7 +137,7 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 |---|---|---|
 | `linhas` | `descricao` | 1:N com `pesquisador` |
 | `pesquisador` | `nome`, `email` (único), `matricula`, `linhas_id` | núcleo do modelo |
-| `usuarios` | `username` (único), `categoria`, `status`, `pesquisador_id` | N:1 com `pesquisador` |
+| `usuarios` | `email` (único, autoriza o login), `username`, `google_sub`, `categoria`, `status` | N:1 com `pesquisador` |
 | `titulacao` | `titulo`, `instituicao`, `ano` | N:1 com `pesquisador` |
 | `cursos` | `titulo`, `resumo`, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
 | `projetos` | `titulo`, `resumo`, `status`, `tipo` | N:1 com `pesquisador` (coordenador) |
@@ -170,10 +171,11 @@ no `sync`. Comportamento ao apagar o registro-pai:
 
 ### Três divergências conscientes em relação ao DER
 
-1. **`usuarios` ganhou três colunas** que o diagrama não previa, porque são exigidas pela
-   autenticação pedida: `senha_hash` (bcrypt), `totp_secret` (segredo do Google
-   Authenticator) e `totp_ativo`. Nenhuma delas é devolvida pela API — o `defaultScope` do
-   model as exclui de toda consulta.
+1. **`usuarios` ganhou colunas** que o diagrama não previa, exigidas pelo login com conta
+   Google: `email` (o endereço que autoriza o acesso), `google_sub` (identificador da conta
+   Google, gravado no primeiro login), `nome`, `avatar_url` e `ultimo_acesso`. O
+   `google_sub` nunca sai da API — o `defaultScope` e o `toJSON` do model o excluem de
+   qualquer resposta. **Não existe coluna de senha em lugar nenhum.**
 2. **`producao` exibia "7 more..."** no diagrama, com as colunas ocultas. Foram propostas
    `tipo`, `doi`, `issn_isbn`, `volume`, `paginas`, `qualis` e `url`. Se o diagrama completo
    trouxer outros nomes, ajuste `backend/models/Producao.js` e os formulários
@@ -186,32 +188,49 @@ no `sync`. Comportamento ao apagar o registro-pai:
 
 ---
 
-## 4. Autenticação (JWT + Google Authenticator)
+## 4. Autenticação (conta Google)
 
-O login tem duas etapas e três tipos de token.
+**O sistema não armazena senha.** Quem confirma a identidade é o Google; a
+aplicação apenas decide se aquela conta pode entrar.
 
 ```
-1) POST /api/auth/login        { username, senha }
-      ↓ senha confere
-   devolve mfaToken (5 min)
-   + no primeiro acesso: qrCode e segredo do Google Authenticator
+1) O navegador mostra o botão do Google (Google Identity Services)
+      ↓ o usuário escolhe a conta
+   o Google devolve um ID token na própria página
 
-2) POST /api/auth/verificar    { mfaToken, codigo }
-      ↓ código TOTP de 6 dígitos confere
+2) POST /api/auth/google  { credential }
+      ↓ a API valida assinatura, emissor, expiração e `aud`
+      ↓ procura o e-mail em `usuarios`  →  não achou? 403
+      ↓ grava o `google_sub` no primeiro acesso
    devolve accessToken (2h), refreshToken (7d) e os dados do usuário
 
-3) Requisições a /api/admin/*  Authorization: Bearer <accessToken>
+3) Requisições a /api/admin/*  →  Authorization: Bearer <accessToken>
 
-4) POST /api/auth/refresh      { refreshToken }  → novo par de tokens
+4) POST /api/auth/refresh  { refreshToken }  → novo par de tokens
 ```
 
-- O **primeiro acesso** de cada usuário gera o segredo TOTP e devolve o QR Code; o 2FA só
-  é marcado como ativo depois que o usuário acerta o primeiro código.
-- O frontend renova o `accessToken` automaticamente no interceptor do axios
-  (`src/services/http.js`) quando recebe 401; se a renovação falha, encerra a sessão.
-- `POST /api/auth/2fa/reiniciar` (ou, para um admin, `/admin/usuarios/:id/reiniciar-2fa`)
-  desvincula o aparelho — útil quando o usuário troca de celular.
-- As rotas de login e verificação têm limite de tentativas (`express-rate-limit`).
+### Quem pode entrar
+
+O acesso é **por lista**: só entra quem tem um registro em `usuarios` com aquele
+e-mail. Uma conta Google válida e não cadastrada recebe 403 com uma mensagem
+explicando o que fazer. Para autorizar alguém, um administrador cadastra o
+e-mail em **Painel → Usuários**.
+
+### Vínculo com a conta Google
+
+No primeiro login o `google_sub` (identificador estável da conta Google) é
+gravado no usuário. A partir daí, se o mesmo e-mail chegar com outro `sub`, o
+acesso é bloqueado — isso protege contra troca de titular do endereço. Um
+administrador pode soltar o vínculo em **Usuários → Desvincular**, e o próprio
+usuário em **Meu perfil**.
+
+### Por que validar o token no servidor
+
+Um ID token é um JWT comum: qualquer pessoa consegue escrever um com o conteúdo
+que quiser. O que o torna confiável é a assinatura do Google, conferida em
+`helpers/googleService.js` contra as chaves públicas do Google. Aceitar o
+conteúdo do token sem essa verificação deixaria qualquer um entrar como
+administrador.
 
 ### Autorização
 
@@ -231,13 +250,10 @@ Prefixo padrão: `/api`.
 
 | Método | Rota | Descrição |
 |---|---|---|
-| POST | `/auth/login` | etapa 1 — usuário e senha |
-| POST | `/auth/verificar` | etapa 2 — código do Google Authenticator |
+| POST | `/auth/google` | login com o ID token do Google |
 | POST | `/auth/refresh` | renova o access token |
 | GET | `/auth/eu` | dados do usuário autenticado |
-| POST | `/auth/trocar-senha` | troca da própria senha |
-| GET | `/auth/2fa/qrcode` | reexibe o QR Code |
-| POST | `/auth/2fa/reiniciar` | desvincula o aparelho do 2FA |
+| POST | `/auth/desvincular` | solta o vínculo com a conta Google atual |
 
 ### `/publico` (sem autenticação, somente leitura)
 
@@ -269,7 +285,7 @@ Rotas adicionais:
 | DELETE | `/admin/projetos/:id/equipe/:pesquisadorId` | remove o vínculo |
 | POST | `/admin/producoes/:id/autores` | vincula autor à produção |
 | DELETE | `/admin/producoes/:id/autores/:pesquisadorId` | remove a autoria |
-| POST | `/admin/usuarios/:id/reiniciar-2fa` | admin libera novo vínculo de aparelho |
+| POST | `/admin/usuarios/:id/desvincular` | admin solta o vínculo Google do usuário |
 
 ### Formatos de resposta
 
@@ -332,16 +348,18 @@ administrativa só declara os campos da tabela, o formulário e o serviço corre
 | `CORS_ORIGIN` | origens liberadas (lista separada por vírgula) |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | conexão MariaDB |
 | `DB_LOGGING`, `DB_SYNC`, `DB_SYNC_ALTER` | log de SQL e sincronização automática (dev) |
-| `JWT_SECRET`, `JWT_EXPIRES_IN` | access token |
+| `GOOGLE_CLIENT_ID` | Client ID do OAuth 2.0; precisa bater com o do frontend |
+| `JWT_SECRET`, `JWT_EXPIRES_IN` | access token da aplicação |
 | `JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRES_IN` | refresh token |
-| `JWT_MFA_SECRET`, `JWT_MFA_EXPIRES_IN` | token intermediário do 2FA |
-| `TOTP_ISSUER`, `TOTP_WINDOW` | nome exibido no Google Authenticator e tolerância de relógio |
-| `SEED_ADMIN_*` | usuário administrador criado por `npm run db` |
+| `SEED_ADMIN_USERNAME`, `SEED_ADMIN_NOME` | usuário administrador criado por `npm run db` |
+| `SEED_ADMIN_EMAIL` | **e-mail da conta Google** autorizada no primeiro acesso |
 
 ### `frontend/.env`
 
 | Variável | Para que serve |
 |---|---|
+| `VITE_USE_MOCKS` | `true` usa os dados de exemplo; `false` liga na API |
+| `VITE_GOOGLE_CLIENT_ID` | mesmo Client ID do backend |
 | `VITE_API_URL` | URL base da API usada pelo axios |
 | `VITE_API_PROXY` | alvo do proxy do Vite em desenvolvimento |
 | `VITE_APP_NOME`, `VITE_APP_DESCRICAO` | identidade do site público |
@@ -386,11 +404,14 @@ npm run dev             # http://localhost:5173
 
 ### Primeiro login
 
-1. Acesse `http://localhost:5173/admin/login`.
-2. Entre com o usuário e a senha definidos em `SEED_ADMIN_USERNAME` / `SEED_ADMIN_PASSWORD`.
-3. Escaneie o QR Code exibido com o **Google Authenticator**.
-4. Digite o código de 6 dígitos para concluir o vínculo e entrar no painel.
-5. Troque a senha em **Meu perfil**.
+1. Crie o ID do cliente OAuth no Google Cloud Console e preencha
+   `GOOGLE_CLIENT_ID` (backend) e `VITE_GOOGLE_CLIENT_ID` (frontend) com o mesmo valor.
+   Cadastre `http://localhost:5173` nas *Origens JavaScript autorizadas*.
+2. Ponha em `SEED_ADMIN_EMAIL` o e-mail da conta Google que será o administrador.
+3. Rode `npm run db` no backend.
+4. Acesse `http://localhost:5173/admin/login` e clique em **Entrar com o Google**.
+5. Autorize os demais membros em **Painel → Usuários**, cadastrando o e-mail da
+   conta Google de cada um.
 
 ---
 
@@ -412,7 +433,12 @@ npm run dev             # http://localhost:5173
   auditoria, ligue em `config/database.js` e rode `npm run db -- --alter`.
 - **Validação com Zod antes do controller**: erros de formato nunca chegam ao banco, e a
   resposta de erro é sempre a mesma estrutura.
-- **Senhas com bcrypt** e segredos TOTP nunca trafegam pela API depois do cadastro inicial.
+- **Nenhuma senha é armazenada**: a identidade vem do Google e o sistema só decide
+  quem entra. Isso elimina de uma vez hash de senha, recuperação por e-mail, política de
+  complexidade e vazamento de credenciais.
+- **Acesso por lista, não por domínio**: cadastrar o e-mail é um ato explícito de
+  autorização. Um filtro por domínio deixaria entrar qualquer pessoa com e-mail
+  institucional, incluindo quem não é do grupo.
 
 ## 10. Próximos passos sugeridos
 

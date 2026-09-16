@@ -1,13 +1,18 @@
 <template>
   <CrudView
+    ref="crud"
     titulo="Usuários"
-    subtitulo="Contas com acesso à área administrativa (exclusivo de administradores)"
+    subtitulo="Contas Google autorizadas a acessar a área administrativa. Cadastrar o e-mail aqui é o que libera o acesso."
     entidade="Usuário"
     :servico="usuarios"
     :campos="campos"
     :formulario-padrao="formularioPadrao"
     :para-formulario="paraFormulario"
   >
+    <template #cell(email)="{ item }">
+      <span class="text-break">{{ item.email }}</span>
+    </template>
+
     <template #cell(categoria)="{ item }">
       {{ CATEGORIA_USUARIO[item.categoria] ?? '—' }}
     </template>
@@ -18,28 +23,27 @@
       </BBadge>
     </template>
 
-    <template #cell(totp_ativo)="{ item }">
-      <BBadge :variant="item.totp_ativo ? 'success' : 'warning'">
-        {{ item.totp_ativo ? 'Vinculado' : 'Pendente' }}
-      </BBadge>
+    <template #cell(vinculo)="{ item }">
+      <span v-if="item.ultimo_acesso" class="i2a-selo">Ativa</span>
+      <span v-else class="i2a-meta">Nunca entrou</span>
     </template>
 
     <template #cell(pesquisador)="{ item }">{{ item.pesquisador?.nome ?? '—' }}</template>
 
-    <template #formulario="{ form, editando }">
+    <template #formulario="{ form }">
       <BRow class="g-3">
         <BCol md="6">
-          <BFormGroup label="Usuário" label-for="username">
-            <BFormInput id="username" v-model.trim="form.username" :disabled="editando" required />
+          <BFormGroup
+            label="E-mail da conta Google"
+            label-for="email"
+            description="É este endereço que libera o login. Precisa ser o e-mail exato da conta Google."
+          >
+            <BFormInput id="email" v-model.trim="form.email" type="email" required />
           </BFormGroup>
         </BCol>
         <BCol md="6">
-          <BFormGroup
-            label="Senha"
-            label-for="senha"
-            :description="editando ? 'Deixe em branco para manter a senha atual.' : 'Mínimo de 8 caracteres.'"
-          >
-            <BFormInput id="senha" v-model="form.senha" type="password" autocomplete="new-password" />
+          <BFormGroup label="Usuário" label-for="username" description="Identificador curto usado na interface.">
+            <BFormInput id="username" v-model.trim="form.username" required />
           </BFormGroup>
         </BCol>
         <BCol md="4">
@@ -71,10 +75,11 @@ import { usuarios, pesquisadores } from '@/services/adminService';
 import { CATEGORIA_USUARIO, STATUS_USUARIO } from '@/utils/formatadores';
 
 const campos = [
-  { key: 'username', label: 'Usuário', sortable: true },
+  { key: 'email', label: 'E-mail (Google)', sortable: true },
+  { key: 'username', label: 'Usuário' },
   { key: 'categoria', label: 'Categoria' },
   { key: 'status', label: 'Situação' },
-  { key: 'totp_ativo', label: '2FA' },
+  { key: 'vinculo', label: 'Conta' },
   { key: 'pesquisador', label: 'Pesquisador' }
 ];
 
@@ -91,7 +96,7 @@ const opcoesPesquisadores = ref([{ value: null, text: 'Sem vínculo' }]);
 
 const formularioPadrao = () => ({
   username: '',
-  senha: '',
+  email: '',
   categoria: 3,
   status: 1,
   pesquisador_id: null
@@ -99,7 +104,7 @@ const formularioPadrao = () => ({
 
 const paraFormulario = (item) => ({
   username: item.username,
-  senha: '',
+  email: item.email,
   categoria: item.categoria,
   status: item.status,
   pesquisador_id: item.pesquisador_id ?? null

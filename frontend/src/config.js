@@ -14,6 +14,12 @@ function booleano(valor, padrao = false) {
 
 export const USANDO_MOCKS = booleano(import.meta.env.VITE_USE_MOCKS, true);
 
+/**
+ * Client ID do OAuth 2.0 (Google Cloud Console). É público de propósito —
+ * aparece no HTML. A segurança vem da validação da assinatura no backend.
+ */
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
+
 export const APP = {
   nome: import.meta.env.VITE_APP_NOME ?? 'Grupo de Pesquisa I2A',
   sigla: 'I2A',

@@ -1,6 +1,9 @@
 /**
  * Estado global da sessão administrativa.
- * O login tem duas etapas: `senha` -> `codigo` (Google Authenticator) -> `autenticado`.
+ *
+ * O login tem um passo só: o botão do Google devolve um ID token, mandamos
+ * para a API e recebemos de volta o par de tokens JWT. Não há senha nem
+ * segunda etapa.
  */
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
@@ -21,16 +24,15 @@ export const useAuthStore = defineStore('auth', () => {
   const carregando = ref(false);
   const erro = ref('');
 
-  // estado intermediário da autenticação em dois passos
-  const etapa = ref('senha'); // 'senha' | 'cadastrar-2fa' | 'verificar-2fa'
-  const mfaToken = ref('');
-  const qrCode = ref('');
-  const segredo = ref('');
-
   const autenticado = computed(() => Boolean(accessToken.value && usuario.value));
   const ehAdmin = computed(() => usuario.value?.categoria === CATEGORIA.ADMIN);
   const ehGestor = computed(() =>
     [CATEGORIA.ADMIN, CATEGORIA.COORDENADOR].includes(usuario.value?.categoria)
+  );
+
+  /** Nome curto para saudações e para o menu da conta. */
+  const nomeExibido = computed(
+    () => usuario.value?.pesquisador?.nome ?? usuario.value?.nome ?? usuario.value?.username ?? ''
   );
 
   function guardarTokens({ accessToken: at, refreshToken: rt }) {
@@ -42,48 +44,25 @@ export const useAuthStore = defineStore('auth', () => {
   function limpar() {
     usuario.value = null;
     accessToken.value = null;
-    etapa.value = 'senha';
-    mfaToken.value = '';
-    qrCode.value = '';
-    segredo.value = '';
     localStorage.removeItem(CHAVE_ACCESS);
     localStorage.removeItem(CHAVE_REFRESH);
   }
 
-  /** Etapa 1: usuário e senha. */
-  async function entrar(username, senha) {
+  /**
+   * Troca o ID token do Google pelos tokens da aplicação.
+   * @param {string} credential ID token devolvido pelo botão do Google
+   */
+  async function entrarComGoogle(credential) {
     carregando.value = true;
     erro.value = '';
     try {
-      const resposta = await authService.login(username, senha);
-      etapa.value = resposta.etapa;
-      mfaToken.value = resposta.mfaToken;
-      qrCode.value = resposta.qrCode ?? '';
-      segredo.value = resposta.segredo ?? '';
-      return resposta;
-    } catch (e) {
-      erro.value = mensagemDeErro(e, 'Não foi possível entrar.');
-      throw e;
-    } finally {
-      carregando.value = false;
-    }
-  }
-
-  /** Etapa 2: código de 6 dígitos do Google Authenticator. */
-  async function confirmarCodigo(codigo) {
-    carregando.value = true;
-    erro.value = '';
-    try {
-      const resposta = await authService.verificar(mfaToken.value, codigo);
+      const resposta = await authService.google(credential);
       guardarTokens(resposta);
       usuario.value = resposta.usuario;
-      etapa.value = 'senha';
-      mfaToken.value = '';
-      qrCode.value = '';
-      segredo.value = '';
       return resposta;
     } catch (e) {
-      erro.value = mensagemDeErro(e, 'Código inválido.');
+      erro.value = mensagemDeErro(e, 'Não foi possível entrar com essa conta Google.');
+      limpar();
       throw e;
     } finally {
       carregando.value = false;
@@ -102,6 +81,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   function sair() {
     limpar();
+    // encerra também a sessão do widget do Google, para que a próxima entrada
+    // volte a perguntar qual conta usar
+    window.google?.accounts?.id?.disableAutoSelect?.();
   }
 
   return {
@@ -109,15 +91,11 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken,
     carregando,
     erro,
-    etapa,
-    mfaToken,
-    qrCode,
-    segredo,
     autenticado,
     ehAdmin,
     ehGestor,
-    entrar,
-    confirmarCodigo,
+    nomeExibido,
+    entrarComGoogle,
     restaurarSessao,
     sair
   };

@@ -37,7 +37,7 @@ const repo = {
     ordenar: (a, b) => (b.ano ?? 0) - (a.ano ?? 0)
   }),
   usuarios: criarRepositorio(dados.usuarios, {
-    camposBusca: ['username'],
+    camposBusca: ['username', 'email'],
     ordenar: (a, b) => a.username.localeCompare(b.username)
   })
 };
@@ -194,9 +194,9 @@ export const admin = {
 
   usuarios: {
     ...repo.usuarios,
-    async reiniciar2fa(id) {
-      await repo.usuarios.atualizar(id, { totp_ativo: false });
-      return { mensagem: 'Segundo fator reiniciado para este usuário.' };
+    async desvincular(id) {
+      await repo.usuarios.atualizar(id, { ultimo_acesso: null });
+      return { mensagem: 'Conta Google desvinculada.' };
     }
   }
 };
@@ -204,6 +204,8 @@ export const admin = {
 /* --------------------------- autenticação ------------------------- */
 const USUARIO_DEMO = {
   ...dados.usuarios[0],
+  nome: dados.pesquisadores[0].nome,
+  avatar_url: null,
   pesquisador: {
     id: dados.pesquisadores[0].id,
     nome: dados.pesquisadores[0].nome,
@@ -213,20 +215,12 @@ const USUARIO_DEMO = {
 
 export const auth = {
   /**
-   * No modo de demonstração qualquer usuário/senha é aceito e qualquer
-   * código de 6 dígitos passa. Serve só para percorrer as telas do painel.
+   * No modo de demonstração o botão devolve um token falso e qualquer
+   * "clique" entra como o administrador de exemplo. Serve só para percorrer
+   * as telas do painel sem o backend e sem Client ID do Google.
    */
-  async login(username) {
-    await atraso(400);
-    return {
-      etapa: 'verificar-2fa',
-      mfaToken: 'mock-mfa-token',
-      mensagem: `Modo demonstração: qualquer código de 6 dígitos entra como "${username}".`
-    };
-  },
-
-  async verificar() {
-    await atraso(400);
+  async google() {
+    await atraso(500);
     return {
       usuario: USUARIO_DEMO,
       accessToken: 'mock-access-token',
@@ -240,18 +234,8 @@ export const auth = {
     return USUARIO_DEMO;
   },
 
-  async trocarSenha() {
-    await atraso(300);
-    return { mensagem: 'Senha alterada com sucesso (demonstração).' };
-  },
-
-  async qrcode2fa() {
+  async desvincular() {
     await atraso(200);
-    return { qrCode: '', ativo: true };
-  },
-
-  async reiniciar2fa() {
-    await atraso(200);
-    return { mensagem: 'Segundo fator removido (demonstração).' };
+    return { mensagem: 'Conta Google desvinculada (demonstração).' };
   }
 };

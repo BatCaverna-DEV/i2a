@@ -47,7 +47,7 @@ const real = {
 
   usuarios: {
     ...recurso('usuarios'),
-    reiniciar2fa: (id) => http.post(`/admin/usuarios/${id}/reiniciar-2fa`).then((r) => r.data)
+    desvincular: (id) => http.post(`/admin/usuarios/${id}/desvincular`).then((r) => r.data)
   }
 };
 
