@@ -140,7 +140,7 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 | `usuarios` | `email` (único, autoriza o login), `username`, `google_sub`, `categoria`, `status` | N:1 com `pesquisador` |
 | `titulacao` | `titulo`, `instituicao`, `ano` | N:1 com `pesquisador` |
 | `cursos` | `titulo`, `resumo`, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
-| `projetos` | `titulo`, `resumo`, `status`, `tipo` | N:1 com `pesquisador` (coordenador) |
+| `projetos` | `titulo` VARCHAR(255), `resumo` TEXT, `status`, `tipo` | N:1 com `pesquisador` (coordenador) |
 | `orientacacoes` | — | N:N entre `pesquisador` e `projetos` |
 | `producao` | `titulo`, `ano`, `veiculo` (+ campos abaixo) | — |
 | `autores` | `ordem` | N:N entre `pesquisador` e `producao` |
@@ -169,7 +169,7 @@ no `sync`. Comportamento ao apagar o registro-pai:
 | `projetos.tipo` | 1 Pesquisa · 2 Extensão · 3 Desenvolvimento · 4 Ensino |
 | `producao.tipo` | 1 Artigo periódico · 2 Artigo evento · 3 Capítulo · 4 Livro · 5 Dissertação · 6 Tese · 7 Software · 8 Patente · 99 Outro |
 
-### Três divergências conscientes em relação ao DER
+### Quatro divergências conscientes em relação ao DER
 
 1. **`usuarios` ganhou colunas** que o diagrama não previa, exigidas pelo login com conta
    Google: `email` (o endereço que autoriza o acesso), `google_sub` (identificador da conta
@@ -180,7 +180,11 @@ no `sync`. Comportamento ao apagar o registro-pai:
    `tipo`, `doi`, `issn_isbn`, `volume`, `paginas`, `qualis` e `url`. Se o diagrama completo
    trouxer outros nomes, ajuste `backend/models/Producao.js` e os formulários
    correspondentes no frontend.
-3. **Os tipos das chaves mudaram**: o DER usa `VARCHAR(45)`, `VARCHAR(50)` e `VARCHAR(100)`
+3. **`projetos.titulo` e `projetos.resumo` cresceram**: o DER definia ambos como
+   `VARCHAR(45)`. Quarenta e cinco caracteres não cabem nem um título de projeto, muito
+   menos um resumo. Viraram `VARCHAR(255)` e `TEXT`. As mesmas colunas em `producao` e
+   `cursos` continuam com 45 e provavelmente merecem o mesmo tratamento.
+4. **Os tipos das chaves mudaram**: o DER usa `VARCHAR(45)`, `VARCHAR(50)` e `VARCHAR(100)`
    para os IDs, e `INT AUTO_INCREMENT` em `projetos.id`. Todos passaram a ser UUID
    (`CHAR(36)`), inclusive `projetos.id` e `orientacacoes.projetos_id`. Uma consequência
    prática: UUID não tem ordem cronológica, então as listagens de projetos ordenam por

@@ -8,6 +8,10 @@
     :formulario-padrao="formularioPadrao"
     :para-formulario="paraFormulario"
   >
+    <template #cell(titulo)="{ item }">
+      <span class="d-inline-block text-truncate" style="max-width: 32rem">{{ item.titulo }}</span>
+    </template>
+
     <template #cell(status)="{ item }">
       <BBadge :variant="STATUS_PROJETO[item.status]?.variante ?? 'secondary'">
         {{ STATUS_PROJETO[item.status]?.rotulo ?? '—' }}
@@ -30,12 +34,22 @@
       <BRow class="g-3">
         <BCol cols="12">
           <BFormGroup label="Título" label-for="titulo">
-            <BFormInput id="titulo" v-model="form.titulo" required maxlength="45" />
+            <BFormInput id="titulo" v-model="form.titulo" required maxlength="255" />
+            <p class="i2a-meta mb-0 mt-1 text-end">
+              {{ (form.titulo ?? '').length }}/255
+            </p>
           </BFormGroup>
         </BCol>
         <BCol cols="12">
-          <BFormGroup label="Resumo" label-for="resumo" description="Máximo de 45 caracteres.">
-            <BFormInput id="resumo" v-model="form.resumo" maxlength="45" />
+          <BFormGroup
+            label="Resumo"
+            label-for="resumo"
+            description="Texto livre. Quebras de linha são preservadas na página pública."
+          >
+            <BFormTextarea id="resumo" v-model="form.resumo" rows="8" />
+            <p class="i2a-meta mb-0 mt-1 text-end">
+              {{ (form.resumo ?? '').length }} caracteres
+            </p>
           </BFormGroup>
         </BCol>
         <BCol md="4">
@@ -60,7 +74,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { BRow, BCol, BFormGroup, BFormInput, BFormSelect, BBadge } from 'bootstrap-vue-next';
+import {
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormInput,
+  BFormTextarea,
+  BFormSelect,
+  BBadge
+} from 'bootstrap-vue-next';
 
 import CrudView from '@/components/admin/CrudView.vue';
 import { projetos, pesquisadores } from '@/services/adminService';

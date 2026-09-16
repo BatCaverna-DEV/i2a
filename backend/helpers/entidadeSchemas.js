@@ -50,8 +50,9 @@ export const cursoUpdateSchema = cursoSchema.partial();
 
 /* ------------------------- projetos ------------------------- */
 export const projetoSchema = z.object({
-  titulo: z.string().min(3).max(45),
-  resumo: opcional(z.string().max(45)),
+  titulo: z.string().min(5, 'O título deve ter ao menos 5 caracteres.').max(255),
+  // resumo é texto longo: o limite existe só para barrar abuso
+  resumo: opcional(z.string().max(20000, 'O resumo passou de 20.000 caracteres.')),
   status: z.coerce.number().int().min(0).max(3).default(0),
   tipo: z.coerce.number().int().min(1).max(4).default(1),
   pesquisador_id: z.string().uuid('Identificador inválido.')

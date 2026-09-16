@@ -13,7 +13,8 @@
             {{ TIPO_PROJETO[dados.tipo] ?? '—' }} · {{ STATUS_PROJETO[dados.status]?.rotulo }}
           </p>
           <h1 class="h2 fw-bold mb-3">{{ dados.titulo }}</h1>
-          <p class="fs-6 text-body-secondary mb-0">
+          <!-- white-space: pre-line mantém os parágrafos digitados no painel -->
+          <p class="fs-6 text-body-secondary mb-0" style="white-space: pre-line">
             {{ dados.resumo || 'Sem resumo cadastrado.' }}
           </p>
         </BCol>

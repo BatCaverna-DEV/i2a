@@ -130,8 +130,16 @@ const p = (i) => {
 export const projetos = [
   {
     id: '33333333-3333-4333-8333-000000000001',
-    titulo: 'Detecção precoce de doenças crônicas',
-    resumo: 'Modelos preditivos sobre prontuários eletrônicos da rede municipal.',
+    titulo: 'Detecção precoce de doenças crônicas a partir de prontuários eletrônicos da atenção básica',
+    resumo:
+      'O projeto investiga modelos preditivos capazes de sinalizar risco de doenças ' +
+      'crônicas — diabetes tipo 2 e hipertensão, em especial — a partir de registros ' +
+      'já coletados de rotina na atenção básica municipal.\n\n' +
+      'A hipótese é que a combinação de variáveis clínicas simples com padrões ' +
+      'temporais de comparecimento às unidades de saúde antecipe o diagnóstico em ' +
+      'meses, permitindo encaminhamento precoce.\n\n' +
+      'A avaliação considera não só acurácia, mas calibração e explicabilidade: um ' +
+      'modelo que a equipe de saúde não entende não chega a ser usado.',
     status: 1,
     tipo: 1,
     pesquisador_id: pesquisadores[1].id,

@@ -1,8 +1,11 @@
 /**
  * Projetos de pesquisa e extensão (tabela `projetos` do DER).
  *
- * OBSERVAÇÃO SOBRE O DER: no diagrama `projetos.id` é INT AUTO_INCREMENT.
- * Aqui ele é UUID, para ficar uniforme com as demais tabelas do sistema.
+ * OBSERVAÇÕES SOBRE O DER:
+ *  - no diagrama `projetos.id` é INT AUTO_INCREMENT; aqui é UUID, para ficar
+ *    uniforme com as demais tabelas;
+ *  - `titulo` e `resumo` eram VARCHAR(45). Quarenta e cinco caracteres não
+ *    cabem nem um título de projeto, então viraram VARCHAR(255) e TEXT.
  */
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
@@ -33,12 +36,17 @@ const Projeto = sequelize.define(
       allowNull: false
     },
     titulo: {
-      type: DataTypes.STRING(45),
+      // o DER previa VARCHAR(45), curto demais para um título de projeto
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate: { notEmpty: { msg: 'O título do projeto é obrigatório.' } }
+      validate: {
+        notEmpty: { msg: 'O título do projeto é obrigatório.' },
+        len: { args: [5, 255], msg: 'O título deve ter entre 5 e 255 caracteres.' }
+      }
     },
     resumo: {
-      type: DataTypes.STRING(45),
+      // TEXT: até ~65 mil caracteres, suficiente para o resumo inteiro
+      type: DataTypes.TEXT,
       allowNull: true
     },
     status: {
