@@ -139,10 +139,10 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 | `pesquisador` | `nome`, `email` (único), `matricula`, `linhas_id` | núcleo do modelo |
 | `usuarios` | `email` (único, autoriza o login), `username`, `google_sub`, `categoria`, `status` | N:1 com `pesquisador` |
 | `titulacao` | `titulo`, `instituicao`, `ano` | N:1 com `pesquisador` |
-| `cursos` | `titulo`, `resumo`, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
+| `cursos` | `titulo` VARCHAR(255), `resumo` TEXT, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
 | `projetos` | `titulo` VARCHAR(255), `resumo` TEXT, `status`, `tipo` | N:1 com `pesquisador` (coordenador) |
 | `orientacacoes` | — | N:N entre `pesquisador` e `projetos` |
-| `producao` | `titulo`, `ano`, `veiculo` (+ campos abaixo) | — |
+| `producao` | `titulo` VARCHAR(255), `ano`, `veiculo` VARCHAR(255), `resumo` TEXT (+ campos abaixo) | — |
 | `autores` | `ordem` | N:N entre `pesquisador` e `producao` |
 
 ### Integridade referencial
@@ -180,10 +180,19 @@ no `sync`. Comportamento ao apagar o registro-pai:
    `tipo`, `doi`, `issn_isbn`, `volume`, `paginas`, `qualis` e `url`. Se o diagrama completo
    trouxer outros nomes, ajuste `backend/models/Producao.js` e os formulários
    correspondentes no frontend.
-3. **`projetos.titulo` e `projetos.resumo` cresceram**: o DER definia ambos como
-   `VARCHAR(45)`. Quarenta e cinco caracteres não cabem nem um título de projeto, muito
-   menos um resumo. Viraram `VARCHAR(255)` e `TEXT`. As mesmas colunas em `producao` e
-   `cursos` continuam com 45 e provavelmente merecem o mesmo tratamento.
+3. **Os campos de texto cresceram**: o DER definia como `VARCHAR(45)` os títulos e
+   resumos de `projetos`, `cursos` e `producao`. Quarenta e cinco caracteres não cabem
+   nem um título, muito menos um resumo. Ficou assim:
+
+   | Coluna | DER | Agora |
+   |---|---|---|
+   | `projetos.titulo`, `cursos.titulo`, `producao.titulo` | VARCHAR(45) | VARCHAR(255) |
+   | `projetos.resumo`, `cursos.resumo` | VARCHAR(45) | TEXT |
+   | `producao.veiculo` | VARCHAR(45) | VARCHAR(255) |
+   | `producao.resumo` | — | TEXT (novo: abstract) |
+
+   Nas páginas públicas os resumos usam `white-space: pre-line`, então as quebras de
+   linha digitadas no painel são preservadas.
 4. **Os tipos das chaves mudaram**: o DER usa `VARCHAR(45)`, `VARCHAR(50)` e `VARCHAR(100)`
    para os IDs, e `INT AUTO_INCREMENT` em `projetos.id`. Todos passaram a ser UUID
    (`CHAR(36)`), inclusive `projetos.id` e `orientacacoes.projetos_id`. Uma consequência

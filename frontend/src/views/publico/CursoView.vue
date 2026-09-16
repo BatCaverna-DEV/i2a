@@ -13,7 +13,10 @@
             {{ aberto ? 'Inscrições abertas' : 'Inscrições fechadas' }}
           </p>
           <h1 class="h2 fw-bold mb-3">{{ dados.titulo }}</h1>
-          <p class="fs-6 text-body-secondary">{{ dados.resumo || 'Sem resumo cadastrado.' }}</p>
+          <!-- white-space: pre-line mantém os parágrafos digitados no painel -->
+          <p class="fs-6 text-body-secondary" style="white-space: pre-line">
+            {{ dados.resumo || 'Sem resumo cadastrado.' }}
+          </p>
         </BCol>
 
         <BCol lg="4">

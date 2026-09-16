@@ -38,8 +38,9 @@ export const titulacaoUpdateSchema = titulacaoSchema.partial();
 
 /* -------------------------- cursos -------------------------- */
 export const cursoSchema = z.object({
-  titulo: z.string().min(3).max(45),
-  resumo: opcional(z.string().max(45)),
+  titulo: z.string().min(3).max(255),
+  // resumo/ementa é texto longo: o limite existe só para barrar abuso
+  resumo: opcional(z.string().max(20000, 'O resumo passou de 20.000 caracteres.')),
   inicio: opcional(z.coerce.date()),
   inscricoes_inicio: opcional(z.coerce.date()),
   inscricoes_fim: opcional(z.coerce.date()),
@@ -62,9 +63,10 @@ export const projetoUpdateSchema = projetoSchema.partial();
 
 /* ------------------------- producao ------------------------- */
 export const producaoSchema = z.object({
-  titulo: z.string().min(3).max(45),
+  titulo: z.string().min(3).max(255),
   ano: opcional(z.coerce.number().int().min(1900).max(2100)),
-  veiculo: opcional(z.string().max(45)),
+  veiculo: opcional(z.string().max(255)),
+  resumo: opcional(z.string().max(20000, 'O resumo passou de 20.000 caracteres.')),
   tipo: z.coerce.number().int().default(1),
   doi: opcional(z.string().max(100)),
   issn_isbn: opcional(z.string().max(45)),

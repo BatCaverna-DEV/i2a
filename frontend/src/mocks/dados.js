@@ -204,8 +204,14 @@ const dias = (n) => new Date(Date.now() + n * 86_400_000).toISOString();
 export const cursos = [
   {
     id: '44444444-4444-4444-8444-000000000001',
-    titulo: 'Introdução ao Python para dados',
-    resumo: 'Curso introdutório, 20h, aberto à comunidade.',
+    titulo: 'Introdução ao Python para análise de dados científicos',
+    resumo:
+      'Curso introdutório de 20 horas, aberto à comunidade, sem pré-requisito de ' +
+      'programação.\n\n' +
+      'Ementa: ambiente e sintaxe básica; estruturas de dados nativas; leitura e ' +
+      'limpeza de arquivos CSV com pandas; agregações e agrupamentos; visualização ' +
+      'com matplotlib; boas práticas de organização de scripts e notebooks.\n\n' +
+      'Avaliação por um projeto final sobre um conjunto de dados escolhido pelo aluno.',
     inicio: dias(30),
     inscricoes_inicio: dias(-5),
     inscricoes_fim: dias(20),
@@ -248,9 +254,11 @@ export const cursos = [
 export const producoes = [
   {
     id: '55555555-5555-4555-8555-000000000001',
-    titulo: 'Deep self-labeled learning',
+    titulo:
+      'Deep self-labeled learning: rotulagem automática por teoria da informação ' +
+      'em cenários semissupervisionados',
     ano: 2025,
-    veiculo: 'Knowledge-Based Systems',
+    veiculo: 'Knowledge-Based Systems (Elsevier)',
     tipo: 1,
     doi: '10.1016/j.knosys.2025.000000',
     qualis: 'A1',

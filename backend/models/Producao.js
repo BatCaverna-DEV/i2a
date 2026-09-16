@@ -1,9 +1,12 @@
 /**
  * Produção científica do grupo (tabela `producao` do DER).
  *
- * OBSERVAÇÃO SOBRE O DER: o diagrama exibe apenas titulo, ano e veiculo,
- * indicando "7 more..." de colunas ocultas. As colunas abaixo de `veiculo`
- * são uma proposta para esses campos — ajuste conforme o diagrama completo.
+ * OBSERVAÇÕES SOBRE O DER:
+ *  - o diagrama exibe apenas titulo, ano e veiculo, indicando "7 more..." de
+ *    colunas ocultas; as colunas abaixo de `veiculo` são uma proposta para
+ *    esses campos — ajuste conforme o diagrama completo;
+ *  - `titulo` e `veiculo` eram VARCHAR(45). Título de artigo e nome de
+ *    periódico passam disso com folga, então viraram VARCHAR(255).
  */
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
@@ -33,9 +36,12 @@ const Producao = sequelize.define(
       allowNull: false
     },
     titulo: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate: { notEmpty: { msg: 'O título da produção é obrigatório.' } }
+      validate: {
+        notEmpty: { msg: 'O título da produção é obrigatório.' },
+        len: { args: [3, 255], msg: 'O título deve ter entre 3 e 255 caracteres.' }
+      }
     },
     ano: {
       type: DataTypes.INTEGER,
@@ -46,7 +52,7 @@ const Producao = sequelize.define(
       }
     },
     veiculo: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.STRING(255),
       allowNull: true,
       comment: 'periódico, evento ou editora'
     },
@@ -65,6 +71,11 @@ const Producao = sequelize.define(
     volume: { type: DataTypes.STRING(20), allowNull: true },
     paginas: { type: DataTypes.STRING(20), allowNull: true },
     qualis: { type: DataTypes.STRING(10), allowNull: true },
+    resumo: {
+      // abstract da publicação; opcional, texto longo
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     url: {
       type: DataTypes.STRING(255),
       allowNull: true,
