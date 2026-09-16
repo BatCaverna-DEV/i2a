@@ -1,17 +1,44 @@
-/** Chamadas do site público (rotas /publico, sem autenticação). */
+/**
+ * Chamadas do site público (rotas /publico da API, sem autenticação).
+ *
+ * Cada função tem DUAS implementações com a mesma assinatura: a real, que fala
+ * com o backend, e a de demonstração, que lê de `src/mocks`. A escolha acontece
+ * uma única vez, aqui embaixo, conforme `VITE_USE_MOCKS`. As telas importam
+ * sempre os mesmos nomes e não sabem qual das duas está ativa.
+ */
 import http from './http.js';
+import { USANDO_MOCKS } from '@/config';
+import { publico as demo } from '@/mocks';
 
-export const estatisticas = () => http.get('/publico/estatisticas').then((r) => r.data);
-export const linhas = () => http.get('/publico/linhas').then((r) => r.data);
+const real = {
+  estatisticas: () => http.get('/publico/estatisticas').then((r) => r.data),
+  linhas: () => http.get('/publico/linhas').then((r) => r.data),
 
-export const pesquisadores = (params) =>
-  http.get('/publico/pesquisadores', { params }).then((r) => r.data);
-export const pesquisador = (id) => http.get(`/publico/pesquisadores/${id}`).then((r) => r.data);
+  pesquisadores: (params) => http.get('/publico/pesquisadores', { params }).then((r) => r.data),
+  pesquisador: (id) => http.get(`/publico/pesquisadores/${id}`).then((r) => r.data),
 
-export const projetos = (params) => http.get('/publico/projetos', { params }).then((r) => r.data);
-export const projeto = (id) => http.get(`/publico/projetos/${id}`).then((r) => r.data);
+  projetos: (params) => http.get('/publico/projetos', { params }).then((r) => r.data),
+  projeto: (id) => http.get(`/publico/projetos/${id}`).then((r) => r.data),
 
-export const cursos = (params) => http.get('/publico/cursos', { params }).then((r) => r.data);
-export const curso = (id) => http.get(`/publico/cursos/${id}`).then((r) => r.data);
+  cursos: (params) => http.get('/publico/cursos', { params }).then((r) => r.data),
+  curso: (id) => http.get(`/publico/cursos/${id}`).then((r) => r.data),
 
-export const producoes = (params) => http.get('/publico/producoes', { params }).then((r) => r.data);
+  producoes: (params) => http.get('/publico/producoes', { params }).then((r) => r.data),
+
+  // AINDA NÃO EXISTE NO BACKEND — ver as sugestões no fim de sistema.md.
+  // Quando a rota for criada, basta trocar esta linha.
+  oportunidades: () => http.get('/publico/oportunidades').then((r) => r.data)
+};
+
+const api = USANDO_MOCKS ? demo : real;
+
+export const estatisticas = (...a) => api.estatisticas(...a);
+export const linhas = (...a) => api.linhas(...a);
+export const pesquisadores = (...a) => api.pesquisadores(...a);
+export const pesquisador = (...a) => api.pesquisador(...a);
+export const projetos = (...a) => api.projetos(...a);
+export const projeto = (...a) => api.projeto(...a);
+export const cursos = (...a) => api.cursos(...a);
+export const curso = (...a) => api.curso(...a);
+export const producoes = (...a) => api.producoes(...a);
+export const oportunidades = (...a) => api.oportunidades(...a);

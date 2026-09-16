@@ -50,6 +50,16 @@ const routes = [
         path: 'producoes',
         name: 'producoes',
         component: () => import('@/views/publico/ProducoesView.vue')
+      },
+      {
+        path: 'participe',
+        name: 'participe',
+        component: () => import('@/views/publico/ParticipeView.vue')
+      },
+      {
+        path: 'contato',
+        name: 'contato',
+        component: () => import('@/views/publico/ContatoView.vue')
       }
     ]
   },

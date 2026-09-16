@@ -1,14 +1,14 @@
 <template>
   <section>
-    <PageHeader :titulo="titulo" :subtitulo="subtitulo">
-      <template #acoes>
-        <BButton variant="primary" @click="abrirNovo">
+    <SecaoTitulo eyebrow="Cadastro" :titulo="titulo" :descricao="subtitulo" tag="h1">
+      <template #acao>
+        <BButton variant="primary" size="sm" @click="abrirNovo">
           <i class="bi bi-plus-lg me-1" />Novo
         </BButton>
       </template>
-    </PageHeader>
+    </SecaoTitulo>
 
-    <BCard>
+    <div class="i2a-card p-3 p-lg-4">
       <BRow class="mb-3 g-2">
         <BCol md="6">
           <BInputGroup>
@@ -68,7 +68,7 @@
           @update:model-value="recarregar"
         />
       </div>
-    </BCard>
+    </div>
 
     <!-- formulário de criação/edição -->
     <BModal
@@ -92,7 +92,6 @@
 <script setup>
 import { ref, reactive, computed, onMounted, useSlots } from 'vue';
 import {
-  BCard,
   BRow,
   BCol,
   BButton,
@@ -106,7 +105,7 @@ import {
   useToast
 } from 'bootstrap-vue-next';
 
-import PageHeader from '@/components/comum/PageHeader.vue';
+import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import { mensagemDeErro } from '@/services/http';

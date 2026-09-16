@@ -1,31 +1,39 @@
 <template>
   <div class="d-flex flex-column min-vh-100">
-    <BNavbar variant="dark" class="px-3">
-      <BNavbarBrand :to="{ name: 'admin-dashboard' }" class="fw-semibold">
-        <i class="bi bi-cpu me-2" />I2A · Administração
-      </BNavbarBrand>
+    <BarraDemo />
 
-      <BNavbarNav class="ms-auto flex-row align-items-center gap-3">
-        <BNavItem :to="{ name: 'home' }" target="_blank">
-          <i class="bi bi-box-arrow-up-right me-1" />Ver site
-        </BNavItem>
+    <header class="i2a-navbar sticky-top">
+      <div class="container-fluid px-3">
+        <nav class="navbar p-0 py-2">
+          <RouterLink :to="{ name: 'admin-dashboard' }" class="navbar-brand d-flex gap-2 align-items-center">
+            <span class="fw-bold">{{ APP.sigla }}</span>
+            <span class="i2a-meta">Administração</span>
+          </RouterLink>
 
-        <BDropdown :text="auth.usuario?.username ?? 'Conta'" variant="outline-light" size="sm" end>
-          <BDropdownItem :to="{ name: 'admin-perfil' }">
-            <i class="bi bi-person-gear me-2" />Meu perfil
-          </BDropdownItem>
-          <BDropdownDivider />
-          <BDropdownItem @click="sair">
-            <i class="bi bi-box-arrow-right me-2" />Sair
-          </BDropdownItem>
-        </BDropdown>
-      </BNavbarNav>
-    </BNavbar>
+          <div class="d-flex align-items-center gap-3">
+            <RouterLink :to="{ name: 'home' }" class="i2a-meta text-decoration-none d-none d-sm-inline">
+              Ver site <i class="bi bi-box-arrow-up-right ms-1" />
+            </RouterLink>
+
+            <BDropdown
+              :text="auth.usuario?.username ?? 'Conta'"
+              variant="outline-secondary"
+              size="sm"
+              end
+            >
+              <BDropdownItem :to="{ name: 'admin-perfil' }">Meu perfil</BDropdownItem>
+              <BDropdownDivider />
+              <BDropdownItem @click="sair">Sair</BDropdownItem>
+            </BDropdown>
+          </div>
+        </nav>
+      </div>
+    </header>
 
     <div class="d-flex flex-grow-1">
-      <AdminSidebar class="d-none d-lg-block" style="width: 260px" />
+      <AdminSidebar class="d-none d-lg-block flex-shrink-0" style="width: 240px" />
 
-      <main class="flex-grow-1 p-3 p-lg-4 bg-body-tertiary">
+      <main class="flex-grow-1 p-3 p-lg-4" style="min-width: 0">
         <RouterView />
       </main>
     </div>
@@ -34,18 +42,12 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import {
-  BNavbar,
-  BNavbarBrand,
-  BNavbarNav,
-  BNavItem,
-  BDropdown,
-  BDropdownItem,
-  BDropdownDivider
-} from 'bootstrap-vue-next';
+import { BDropdown, BDropdownItem, BDropdownDivider } from 'bootstrap-vue-next';
 
 import AdminSidebar from '@/components/admin/AdminSidebar.vue';
+import BarraDemo from '@/components/comum/BarraDemo.vue';
 import { useAuthStore } from '@/stores/auth';
+import { APP } from '@/config';
 
 const auth = useAuthStore();
 const router = useRouter();

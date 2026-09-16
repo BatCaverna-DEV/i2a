@@ -1,6 +1,11 @@
 <template>
   <BContainer class="py-5">
-    <h1 class="h3 fw-bold mb-4">Cursos</h1>
+    <SecaoTitulo
+      eyebrow="Formação"
+      titulo="Cursos"
+      descricao="Cursos, minicursos e oficinas ofertados pelo grupo à comunidade acadêmica e externa."
+      tag="h1"
+    />
 
     <BFormCheckbox v-model="somenteAbertos" switch class="mb-4" @update:model-value="carregar(1)">
       Mostrar apenas cursos com inscrições abertas
@@ -16,7 +21,12 @@
     </BRow>
 
     <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
-      <BPagination v-model="pagina" :total-rows="meta.total" :per-page="meta.limit" @update:model-value="carregar" />
+      <BPagination
+        v-model="pagina"
+        :total-rows="meta.total"
+        :per-page="meta.limit"
+        @update:model-value="carregar"
+      />
     </div>
   </BContainer>
 </template>
@@ -25,6 +35,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { BContainer, BRow, BCol, BFormCheckbox, BPagination } from 'bootstrap-vue-next';
 
+import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import CursoCard from '@/components/publico/CursoCard.vue';

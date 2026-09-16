@@ -1,31 +1,38 @@
-# Frontend — Grupo de Pesquisa I2A
+# .
 
-Aplicação Vue 3 (Composition API + `<script setup>`) com Vite, Vue Router, Pinia e
-bootstrap-vue-next (Bootstrap 5). Um único projeto atende as duas partes do sistema:
+This template should help get you started developing with Vue 3 in Vite.
 
-- **`/`** — site público, consome as rotas `/api/publico/*` sem autenticação;
-- **`/admin`** — painel administrativo, protegido por JWT na guarda do router.
+## Recommended IDE Setup
 
-## Como rodar
+[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-```bash
-cd frontend
+## Recommended Browser Setup
+
+- Chromium-based browsers (Chrome, Edge, Brave, etc.):
+  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
+  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
+- Firefox:
+  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
 npm install
-cp .env.example .env
-npm run dev          # http://localhost:5173
 ```
 
-O Vite faz proxy de `/api` para `http://localhost:3000`, então não há CORS em
-desenvolvimento. Suba o backend antes.
+### Compile and Hot-Reload for Development
 
-## Build de produção
-
-```bash
-npm run build        # gera dist/
-npm run preview      # confere o build localmente
+```sh
+npm run dev
 ```
 
-Como o router usa `createWebHistory`, o servidor de produção precisa redirecionar
-todas as rotas para `index.html` (fallback de SPA).
+### Compile and Minify for Production
 
-A descrição completa da arquitetura está em `../sistema.md`.
+```sh
+npm run build
+```
