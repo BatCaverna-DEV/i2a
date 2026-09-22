@@ -26,10 +26,29 @@ export const TIPO_PRODUCAO = {
   99: 'Outro'
 };
 
+/** Espelha TIPO_PESQUISADOR do backend (coluna pesquisador.tipo). */
+export const TIPO_PESQUISADOR = {
+  1: 'Pesquisador',
+  2: 'Aluno'
+};
+
+/**
+ * Espelha CATEGORIA_USUARIO do backend.
+ *   1 Administrador — gerencia todos os dados
+ *   2 Pesquisador   — gerencia o que é dele e cadastra orientandos
+ *   3 Orientando    — só visualiza os projetos em que participa
+ */
 export const CATEGORIA_USUARIO = {
   1: 'Administrador',
-  2: 'Coordenador',
-  3: 'Pesquisador'
+  2: 'Pesquisador',
+  3: 'Orientando'
+};
+
+/** Explicação curta de cada perfil, usada nos formulários. */
+export const DESCRICAO_CATEGORIA = {
+  1: 'Gerencia todos os dados do sistema.',
+  2: 'Gerencia os próprios projetos, publicações e cursos, e cadastra orientandos.',
+  3: 'Apenas visualiza os projetos em que está envolvido.'
 };
 
 export const STATUS_USUARIO = {

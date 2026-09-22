@@ -135,7 +135,8 @@ export {
   Autor
 };
 
-export { CATEGORIA_USUARIO, STATUS_USUARIO } from './Usuario.js';
+export { CATEGORIA_USUARIO, ROTULO_CATEGORIA, STATUS_USUARIO } from './Usuario.js';
+export { TIPO_PESQUISADOR, ROTULO_TIPO_PESQUISADOR } from './Pesquisador.js';
 export { STATUS_PROJETO, TIPO_PROJETO } from './Projeto.js';
 export { TIPO_PRODUCAO } from './Producao.js';
 

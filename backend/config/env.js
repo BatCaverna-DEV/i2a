@@ -43,21 +43,20 @@ const env = {
     secret: required('JWT_SECRET'),
     expiresIn: process.env.JWT_EXPIRES_IN ?? '2h',
     refreshSecret: required('JWT_REFRESH_SECRET'),
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
-    mfaSecret: required('JWT_MFA_SECRET'),
-    mfaExpiresIn: process.env.JWT_MFA_EXPIRES_IN ?? '5m'
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d'
   },
 
-  totp: {
-    issuer: process.env.TOTP_ISSUER ?? 'Grupo I2A - IFMA',
-    window: Number(process.env.TOTP_WINDOW ?? 1)
+  google: {
+    // Client ID do OAuth 2.0 criado no Google Cloud Console.
+    // É público (aparece no frontend), mas precisa bater com o `aud` do token.
+    clientId: required('GOOGLE_CLIENT_ID')
   },
 
   seed: {
     username: process.env.SEED_ADMIN_USERNAME ?? 'admin',
-    password: process.env.SEED_ADMIN_PASSWORD ?? 'admin123',
     nome: process.env.SEED_ADMIN_NOME ?? 'Administrador I2A',
-    email: process.env.SEED_ADMIN_EMAIL ?? 'admin@i2a.ifma.edu.br'
+    // e-mail da conta Google que poderá entrar na área administrativa
+    email: required('SEED_ADMIN_EMAIL')
   }
 };
 

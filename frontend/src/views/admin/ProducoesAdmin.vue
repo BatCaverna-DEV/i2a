@@ -8,6 +8,10 @@
     :formulario-padrao="formularioPadrao"
     :para-formulario="paraFormulario"
   >
+    <template #cell(titulo)="{ item }">
+      <span class="d-inline-block text-truncate" style="max-width: 26rem">{{ item.titulo }}</span>
+    </template>
+
     <template #cell(tipo)="{ item }">{{ TIPO_PRODUCAO[item.tipo] ?? '—' }}</template>
 
     <template #cell(autores)="{ item }">
@@ -21,7 +25,8 @@
       <BRow class="g-3">
         <BCol cols="12">
           <BFormGroup label="Título" label-for="titulo">
-            <BFormInput id="titulo" v-model="form.titulo" required maxlength="45" />
+            <BFormInput id="titulo" v-model="form.titulo" required maxlength="255" />
+            <p class="i2a-meta mb-0 mt-1 text-end">{{ (form.titulo ?? '').length }}/255</p>
           </BFormGroup>
         </BCol>
         <BCol md="6">
@@ -41,7 +46,7 @@
         </BCol>
         <BCol md="6">
           <BFormGroup label="Veículo" label-for="veiculo" description="Periódico, evento ou editora.">
-            <BFormInput id="veiculo" v-model="form.veiculo" maxlength="45" />
+            <BFormInput id="veiculo" v-model="form.veiculo" maxlength="255" />
           </BFormGroup>
         </BCol>
         <BCol md="6">
@@ -69,13 +74,32 @@
             <BFormInput id="url" v-model="form.url" type="url" maxlength="255" />
           </BFormGroup>
         </BCol>
+        <BCol cols="12">
+          <BFormGroup
+            label="Resumo (abstract)"
+            label-for="resumo"
+            description="Opcional. Ainda não é exibido no site público — fica guardado para quando houver uma página por publicação."
+          >
+            <BFormTextarea id="resumo" v-model="form.resumo" rows="6" />
+            <p class="i2a-meta mb-0 mt-1 text-end">
+              {{ (form.resumo ?? '').length }} caracteres
+            </p>
+          </BFormGroup>
+        </BCol>
       </BRow>
     </template>
   </CrudView>
 </template>
 
 <script setup>
-import { BRow, BCol, BFormGroup, BFormInput, BFormSelect } from 'bootstrap-vue-next';
+import {
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormInput,
+  BFormTextarea,
+  BFormSelect
+} from 'bootstrap-vue-next';
 
 import CrudView from '@/components/admin/CrudView.vue';
 import { producoes } from '@/services/adminService';
@@ -104,7 +128,8 @@ const formularioPadrao = () => ({
   volume: '',
   paginas: '',
   qualis: '',
-  url: ''
+  url: '',
+  resumo: ''
 });
 
 const paraFormulario = (item) => ({
@@ -117,6 +142,7 @@ const paraFormulario = (item) => ({
   volume: item.volume ?? '',
   paginas: item.paginas ?? '',
   qualis: item.qualis ?? '',
-  url: item.url ?? ''
+  url: item.url ?? '',
+  resumo: item.resumo ?? ''
 });
 </script>

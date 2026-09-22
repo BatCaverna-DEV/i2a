@@ -2,6 +2,25 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
+/**
+ * Tipo do membro do grupo (coluna `tipo`).
+ *
+ *  1 PESQUISADOR — docente/pesquisador
+ *  2 ALUNO       — estudante orientado (orientando)
+ *
+ * Não confundir com `usuarios.categoria`, que define o que a conta pode
+ * fazer no painel. Ao cadastrar, o tipo segue a categoria: Orientando → Aluno.
+ */
+export const TIPO_PESQUISADOR = Object.freeze({
+  PESQUISADOR: 1,
+  ALUNO: 2
+});
+
+export const ROTULO_TIPO_PESQUISADOR = Object.freeze({
+  [1]: 'Pesquisador',
+  [2]: 'Aluno'
+});
+
 const Pesquisador = sequelize.define(
   'Pesquisador',
   {
@@ -31,6 +50,14 @@ const Pesquisador = sequelize.define(
     matricula: {
       type: DataTypes.STRING(20),
       allowNull: true
+    },
+    tipo: {
+      type: DataTypes.TINYINT,
+      allowNull: false,
+      defaultValue: TIPO_PESQUISADOR.PESQUISADOR,
+      validate: {
+        isIn: { args: [Object.values(TIPO_PESQUISADOR)], msg: 'Tipo de pesquisador inválido.' }
+      }
     },
     linhas_id: {
       type: DataTypes.UUID,

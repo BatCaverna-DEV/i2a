@@ -2,20 +2,19 @@ import { Router } from 'express';
 
 import * as controller from '../../controllers/usuarioController.js';
 import validate from '../../helpers/validate.js';
-import { autorizar } from '../../helpers/auth.js';
-import { CATEGORIA_USUARIO } from '../../models/Usuario.js';
+import { somenteAdmin } from '../../helpers/auth.js';
 import { usuarioSchema, usuarioUpdateSchema } from '../../helpers/entidadeSchemas.js';
 
 const router = Router();
 
 // toda a gestão de usuários é exclusiva de administradores
-router.use(autorizar(CATEGORIA_USUARIO.ADMIN));
+router.use(somenteAdmin);
 
 router.get('/', controller.listar);
 router.get('/:id', controller.buscar);
 router.post('/', validate(usuarioSchema), controller.criar);
 router.put('/:id', validate(usuarioUpdateSchema), controller.atualizar);
 router.delete('/:id', controller.remover);
-router.post('/:id/reiniciar-2fa', controller.reiniciar2fa);
+router.post('/:id/desvincular', controller.desvincular);
 
 export default router;

@@ -2,50 +2,55 @@
   <BContainer class="py-5">
     <CarregandoBloco v-if="carregando" />
 
-    <BRow v-else-if="dados" class="justify-content-center">
-      <BCol lg="8">
-        <BButton :to="{ name: 'cursos' }" variant="link" class="ps-0 mb-3">
-          <i class="bi bi-arrow-left me-1" />Voltar
-        </BButton>
+    <div v-else-if="dados">
+      <RouterLink :to="{ name: 'cursos' }" class="i2a-meta text-decoration-none">
+        <i class="bi bi-arrow-left me-1" />Cursos
+      </RouterLink>
 
-        <h1 class="h3 fw-bold mb-2">{{ dados.titulo }}</h1>
+      <BRow class="g-5 mt-0">
+        <BCol lg="8">
+          <p class="i2a-eyebrow mb-2">
+            {{ aberto ? 'Inscrições abertas' : 'Inscrições fechadas' }}
+          </p>
+          <h1 class="h2 fw-bold mb-3">{{ dados.titulo }}</h1>
+          <!-- white-space: pre-line mantém os parágrafos digitados no painel -->
+          <p class="fs-6 text-body-secondary" style="white-space: pre-line">
+            {{ dados.resumo || 'Sem resumo cadastrado.' }}
+          </p>
+        </BCol>
 
-        <BBadge :variant="aberto ? 'success' : 'secondary'" class="mb-3">
-          {{ aberto ? 'Inscrições abertas' : 'Inscrições fechadas' }}
-        </BBadge>
+        <BCol lg="4">
+          <div class="i2a-surface p-4">
+            <dl class="mb-0 small">
+              <dt class="i2a-eyebrow fw-normal">Início do curso</dt>
+              <dd class="mb-3">{{ formatarDataHora(dados.inicio) }}</dd>
 
-        <p>{{ dados.resumo || 'Sem resumo cadastrado.' }}</p>
+              <dt class="i2a-eyebrow fw-normal">Inscrições</dt>
+              <dd class="mb-3">
+                {{ formatarDataHora(dados.inscricoes_inicio) }}<br />
+                até {{ formatarDataHora(dados.inscricoes_fim) }}
+              </dd>
 
-        <BCard class="mt-4">
-          <dl class="row mb-0 small">
-            <dt class="col-sm-4">Início do curso</dt>
-            <dd class="col-sm-8">{{ formatarDataHora(dados.inicio) }}</dd>
+              <dt class="i2a-eyebrow fw-normal">Responsável</dt>
+              <dd class="mb-0">
+                {{ dados.responsavel?.nome ?? '—' }}
+                <span v-if="dados.responsavel?.email" class="d-block i2a-meta">
+                  {{ dados.responsavel.email }}
+                </span>
+              </dd>
+            </dl>
+          </div>
+        </BCol>
+      </BRow>
+    </div>
 
-            <dt class="col-sm-4">Inscrições</dt>
-            <dd class="col-sm-8">
-              {{ formatarDataHora(dados.inscricoes_inicio) }} até
-              {{ formatarDataHora(dados.inscricoes_fim) }}
-            </dd>
-
-            <dt class="col-sm-4">Responsável</dt>
-            <dd class="col-sm-8 mb-0">
-              {{ dados.responsavel?.nome ?? '—' }}
-              <span v-if="dados.responsavel?.email" class="text-body-secondary">
-                · {{ dados.responsavel.email }}
-              </span>
-            </dd>
-          </dl>
-        </BCard>
-      </BCol>
-    </BRow>
-
-    <EstadoVazio v-else icone="bi-exclamation-triangle" titulo="Curso não encontrado" descricao="" />
+    <EstadoVazio v-else icone="bi-exclamation-circle" titulo="Curso não encontrado" descricao="" />
   </BContainer>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { BContainer, BRow, BCol, BCard, BBadge, BButton } from 'bootstrap-vue-next';
+import { BContainer, BRow, BCol } from 'bootstrap-vue-next';
 
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';

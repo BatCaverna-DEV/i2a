@@ -3,76 +3,124 @@
     <CarregandoBloco v-if="carregando" />
 
     <div v-else-if="dados">
-      <BButton :to="{ name: 'pesquisadores' }" variant="link" class="ps-0 mb-3">
-        <i class="bi bi-arrow-left me-1" />Voltar
-      </BButton>
+      <RouterLink :to="{ name: 'pesquisadores' }" class="i2a-meta text-decoration-none">
+        <i class="bi bi-arrow-left me-1" />Equipe
+      </RouterLink>
 
-      <BRow class="g-4">
-        <BCol lg="4">
-          <BCard class="text-center">
-            <div
-              class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mx-auto mb-3"
-              style="width: 96px; height: 96px"
+      <BRow class="g-5 mt-0">
+        <BCol lg="7">
+          <p v-if="dados.papel" class="i2a-eyebrow mb-2">{{ dados.papel }}</p>
+          <h1 class="h2 fw-bold mb-2">{{ dados.nome }}</h1>
+          <p class="i2a-meta mb-3">
+            {{ dados.linha?.descricao ?? 'Sem linha definida' }}
+          </p>
+          <p v-if="dados.resumo" class="text-body-secondary">{{ dados.resumo }}</p>
+
+          <div class="d-flex flex-wrap gap-3 i2a-meta">
+            <a :href="`mailto:${dados.email}`" class="link-dark text-decoration-none">
+              <i class="bi bi-envelope me-1" />{{ dados.email }}
+            </a>
+            <a
+              v-if="dados.lattes"
+              :href="dados.lattes"
+              target="_blank"
+              rel="noopener"
+              class="link-dark text-decoration-none"
             >
-              <i class="bi bi-person fs-1" />
-            </div>
-            <h1 class="h5 fw-bold mb-1">{{ dados.nome }}</h1>
-            <p class="small text-body-secondary mb-2">{{ dados.email }}</p>
-            <BBadge v-if="dados.linha" variant="secondary">{{ dados.linha.descricao }}</BBadge>
-          </BCard>
+              <i class="bi bi-box-arrow-up-right me-1" />Currículo Lattes
+            </a>
+          </div>
 
-          <BCard title="Titulações" class="mt-3">
-            <EstadoVazio v-if="!dados.titulacoes?.length" icone="bi-award" titulo="Nenhuma titulação cadastrada" descricao="" />
-            <ul v-else class="list-unstyled small mb-0">
-              <li v-for="(t, i) in dados.titulacoes" :key="i" class="mb-2">
-                <strong>{{ t.titulo }}</strong><br />
-                <span class="text-body-secondary">{{ t.instituicao }} · {{ t.ano ?? '—' }}</span>
-              </li>
-            </ul>
-          </BCard>
+          <hr class="i2a-rule my-4" />
+
+          <SecaoTitulo titulo="Projetos" tag="h2" />
+          <EstadoVazio
+            v-if="!dados.projetos?.length"
+            icone="bi-kanban"
+            titulo="Nenhum projeto vinculado"
+            descricao=""
+          />
+          <ul v-else class="list-unstyled d-grid gap-2 mb-5">
+            <li v-for="p in dados.projetos" :key="p.id" class="border-bottom pb-2">
+              <RouterLink
+                :to="{ name: 'projeto', params: { id: p.id } }"
+                class="text-decoration-none link-dark fw-semibold"
+              >
+                {{ p.titulo }}
+              </RouterLink>
+              <span class="i2a-meta ms-2">{{ STATUS_PROJETO[p.status]?.rotulo }}</span>
+            </li>
+          </ul>
+
+          <SecaoTitulo titulo="Publicações" tag="h2" />
+          <EstadoVazio
+            v-if="!dados.producoes?.length"
+            icone="bi-journal-text"
+            titulo="Nenhuma publicação cadastrada"
+            descricao=""
+          />
+          <ul v-else class="list-unstyled d-grid gap-3 mb-0">
+            <li v-for="pr in dados.producoes" :key="pr.id" class="border-bottom pb-3">
+              <p class="fw-semibold mb-1">{{ pr.titulo }}</p>
+              <p class="i2a-meta mb-0">
+                {{ pr.veiculo || '—' }} · {{ pr.ano ?? 's/d' }} ·
+                {{ TIPO_PRODUCAO[pr.tipo] ?? '' }}
+                <a
+                  v-if="pr.doi"
+                  :href="`https://doi.org/${pr.doi}`"
+                  target="_blank"
+                  rel="noopener"
+                  class="ms-2"
+                >DOI</a>
+              </p>
+            </li>
+          </ul>
         </BCol>
 
-        <BCol lg="8">
-          <BCard title="Projetos" class="mb-3">
-            <EstadoVazio v-if="!dados.projetos?.length" icone="bi-kanban" titulo="Nenhum projeto vinculado" descricao="" />
-            <ul v-else class="list-group list-group-flush">
-              <li v-for="p in dados.projetos" :key="p.id" class="list-group-item px-0 d-flex justify-content-between gap-2">
-                <RouterLink :to="{ name: 'projeto', params: { id: p.id } }" class="text-decoration-none">
-                  {{ p.titulo }}
-                </RouterLink>
-                <BBadge :variant="STATUS_PROJETO[p.status]?.variante ?? 'secondary'">
-                  {{ STATUS_PROJETO[p.status]?.rotulo ?? '—' }}
-                </BBadge>
+        <BCol lg="5">
+          <div class="i2a-surface p-4">
+            <p class="i2a-eyebrow mb-3">Formação</p>
+            <EstadoVazio
+              v-if="!dados.titulacoes?.length"
+              icone="bi-mortarboard"
+              titulo="Sem titulações cadastradas"
+              descricao=""
+            />
+            <ul v-else class="list-unstyled d-grid gap-3 mb-0">
+              <li v-for="(t, i) in dados.titulacoes" :key="i">
+                <p class="small fw-semibold mb-0">{{ t.titulo }}</p>
+                <p class="i2a-meta mb-0">{{ t.instituicao }} · {{ t.ano ?? '—' }}</p>
               </li>
             </ul>
-          </BCard>
 
-          <BCard title="Produção científica">
-            <EstadoVazio v-if="!dados.producoes?.length" icone="bi-journal-text" titulo="Nenhuma produção cadastrada" descricao="" />
-            <ul v-else class="list-group list-group-flush">
-              <li v-for="pr in dados.producoes" :key="pr.id" class="list-group-item px-0">
-                <p class="mb-1 fw-semibold">{{ pr.titulo }}</p>
-                <p class="small text-body-secondary mb-0">
-                  {{ pr.veiculo || '—' }} · {{ pr.ano ?? 's/d' }} · {{ TIPO_PRODUCAO[pr.tipo] ?? '' }}
-                  <a v-if="pr.doi" :href="`https://doi.org/${pr.doi}`" target="_blank" rel="noopener" class="ms-2">
-                    DOI
-                  </a>
-                </p>
-              </li>
-            </ul>
-          </BCard>
+            <template v-if="dados.cursos?.length">
+              <hr class="i2a-rule my-4" />
+              <p class="i2a-eyebrow mb-3">Cursos ministrados</p>
+              <ul class="list-unstyled d-grid gap-2 mb-0">
+                <li v-for="c in dados.cursos" :key="c.id" class="small">
+                  <RouterLink
+                    :to="{ name: 'curso', params: { id: c.id } }"
+                    class="link-dark text-decoration-none"
+                  >
+                    {{ c.titulo }}
+                  </RouterLink>
+                </li>
+              </ul>
+            </template>
+          </div>
         </BCol>
       </BRow>
     </div>
 
-    <EstadoVazio v-else icone="bi-exclamation-triangle" titulo="Pesquisador não encontrado" descricao="" />
+    <EstadoVazio v-else icone="bi-exclamation-circle" titulo="Pesquisador não encontrado" descricao="" />
   </BContainer>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { BContainer, BRow, BCol, BCard, BBadge, BButton } from 'bootstrap-vue-next';
+import { BContainer, BRow, BCol } from 'bootstrap-vue-next';
 
+import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import { pesquisador } from '@/services/publicoService';

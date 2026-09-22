@@ -1,4 +1,9 @@
-/** Cursos e minicursos ofertados pelo grupo (tabela `cursos` do DER). */
+/**
+ * Cursos e minicursos ofertados pelo grupo (tabela `cursos` do DER).
+ *
+ * OBSERVAÇÃO SOBRE O DER: `titulo` e `resumo` eram VARCHAR(45) — curto demais
+ * para os dois. Viraram VARCHAR(255) e TEXT.
+ */
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
@@ -12,12 +17,16 @@ const Curso = sequelize.define(
       allowNull: false
     },
     titulo: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate: { notEmpty: { msg: 'O título do curso é obrigatório.' } }
+      validate: {
+        notEmpty: { msg: 'O título do curso é obrigatório.' },
+        len: { args: [3, 255], msg: 'O título deve ter entre 3 e 255 caracteres.' }
+      }
     },
     resumo: {
-      type: DataTypes.STRING(45),
+      // TEXT: a ementa do curso cabe inteira
+      type: DataTypes.TEXT,
       allowNull: true
     },
     inicio: {

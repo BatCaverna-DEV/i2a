@@ -1,33 +1,31 @@
 <template>
-  <BCard class="h-100 i2a-card-hover">
+  <RouterLink
+    :to="{ name: 'curso', params: { id: curso.id } }"
+    class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
+  >
     <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
       <h3 class="h6 fw-semibold mb-0">{{ curso.titulo }}</h3>
-      <BBadge :variant="aberto ? 'success' : 'secondary'">
+      <span class="text-nowrap" :class="aberto ? 'i2a-selo' : 'i2a-meta'">
         {{ aberto ? 'Inscrições abertas' : 'Fechado' }}
-      </BBadge>
+      </span>
     </div>
 
-    <p class="small text-body-secondary i2a-truncate-3">{{ curso.resumo || 'Sem resumo.' }}</p>
+    <p class="small text-body-secondary i2a-truncate-3 mb-3">
+      {{ curso.resumo || 'Sem resumo.' }}
+    </p>
 
-    <ul class="list-unstyled small mb-3">
-      <li><i class="bi bi-calendar-event me-1" />Início: {{ formatarData(curso.inicio) }}</li>
+    <ul class="list-unstyled i2a-meta mb-0 d-grid gap-1">
+      <li>Início: {{ formatarData(curso.inicio) }}</li>
       <li v-if="curso.inscricoes_fim">
-        <i class="bi bi-clock me-1" />Inscrições até {{ formatarData(curso.inscricoes_fim) }}
+        Inscrições até {{ formatarData(curso.inscricoes_fim) }}
       </li>
-      <li v-if="curso.responsavel">
-        <i class="bi bi-person me-1" />{{ curso.responsavel.nome }}
-      </li>
+      <li v-if="curso.responsavel">{{ curso.responsavel.nome }}</li>
     </ul>
-
-    <BButton :to="{ name: 'curso', params: { id: curso.id } }" size="sm" variant="outline-primary">
-      Detalhes
-    </BButton>
-  </BCard>
+  </RouterLink>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import { BCard, BBadge, BButton } from 'bootstrap-vue-next';
 
 import { formatarData, inscricoesAbertas } from '@/utils/formatadores';
 
