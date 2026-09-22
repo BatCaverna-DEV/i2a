@@ -1,0 +1,93 @@
+# ===========================================================
+# Apache — site do Grupo de Pesquisa I2A (SPA Vue 3 + Vite)
+# ===========================================================
+# Este arquivo fica em frontend/public/ e o Vite o copia para a raiz
+# de dist/ a cada `npm run build`. Suba o conteúdo de dist/ inteiro.
+#
+# Requer mod_rewrite habilitado e `AllowOverride All` (ou ao menos
+# FileInfo) no diretório do site.
+
+Options -Indexes
+DirectoryIndex index.html
+
+# -----------------------------------------------------------
+# Rotas da SPA
+# -----------------------------------------------------------
+# O Vue Router usa createWebHistory: endereços como /projetos/123 ou
+# /admin/dashboard não existem como arquivo. Sem esta regra, recarregar
+# a página ou abrir um link direto devolve 404 do Apache.
+# Tudo o que não for arquivo ou pasta real vai para o index.html.
+#
+# Se o site ficar numa subpasta (ex.: https://dominio/i2a/), troque
+# RewriteBase para /i2a/ e ajuste `base: '/i2a/'` no vite.config.js.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  RewriteRule ^index\.html$ - [L]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# -----------------------------------------------------------
+# Tipos de arquivo
+# -----------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/css .css
+  AddType image/svg+xml .svg
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
+AddDefaultCharset UTF-8
+
+# -----------------------------------------------------------
+# Cache
+# -----------------------------------------------------------
+# Os arquivos em /assets têm hash no nome (index-ByMsHS5A.js): mudou o
+# conteúdo, muda o nome. Podem ficar em cache por um ano.
+# O index.html NÃO pode ficar em cache — é ele que aponta para os
+# assets novos depois de cada deploy.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|mjs|css|woff2?|ttf|eot|svg|png|jpe?g|gif|webp|avif|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # cabeçalhos básicos de segurança
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# O favicon não tem hash no nome: cache curto
+<IfModule mod_headers.c>
+  <Files "favicon.ico">
+    Header set Cache-Control "public, max-age=86400"
+  </Files>
+</IfModule>
+
+# -----------------------------------------------------------
+# Compressão
+# -----------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/manifest+json image/svg+xml
+</IfModule>
+
+# -----------------------------------------------------------
+# Arquivos que não devem ser servidos
+# -----------------------------------------------------------
+<FilesMatch "^\.(env|git|htpasswd)|\.(map|log|md)$">
+  Require all denied
+</FilesMatch>
