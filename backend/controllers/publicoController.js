@@ -30,15 +30,16 @@ export const linhas = asyncHandler(async (req, res) => {
   res.json({ data: registros });
 });
 
-/** GET /publico/pesquisadores — equipe do grupo. */
+/** GET /publico/pesquisadores — equipe do grupo (?q, ?linha, ?tipo=1|2). */
 export const pesquisadores = asyncHandler(async (req, res) => {
   const { page, limit, offset } = parsePaginacao(req.query, { limitePadrao: 24 });
   const where = {};
   if (req.query.linha) where.linhas_id = req.query.linha;
+  if (req.query.tipo) where.tipo = Number(req.query.tipo);
   if (req.query.q) where.nome = { [Op.like]: `%${req.query.q}%` };
 
   const { rows, count } = await Pesquisador.findAndCountAll({
-    attributes: ['id', 'nome', 'email', 'linhas_id'],
+    attributes: ['id', 'nome', 'email', 'tipo', 'linhas_id'],
     where,
     include: [{ model: Linha, as: 'linha', attributes: ['id', 'descricao'] }],
     order: [['nome', 'ASC']],
@@ -52,7 +53,7 @@ export const pesquisadores = asyncHandler(async (req, res) => {
 /** GET /publico/pesquisadores/:id — perfil público do pesquisador. */
 export const pesquisador = asyncHandler(async (req, res) => {
   const registro = await Pesquisador.findByPk(req.params.id, {
-    attributes: ['id', 'nome', 'email'],
+    attributes: ['id', 'nome', 'email', 'tipo'],
     include: [
       { model: Linha, as: 'linha', attributes: ['id', 'descricao'] },
       { model: Titulacao, as: 'titulacoes', attributes: ['titulo', 'instituicao', 'ano'] },

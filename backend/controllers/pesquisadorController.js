@@ -14,6 +14,7 @@
 import crudFactory from './crudFactory.js';
 import asyncHandler from '../helpers/asyncHandler.js';
 import ApiError from '../helpers/ApiError.js';
+import { parsePaginacao, montarResposta } from '../helpers/paginacao.js';
 import { ehAdmin, ehPesquisador, exigirPosse } from '../helpers/auth.js';
 import {
   sequelize,
@@ -26,7 +27,8 @@ import {
   Curso,
   CATEGORIA_USUARIO,
   ROTULO_CATEGORIA,
-  STATUS_USUARIO
+  STATUS_USUARIO,
+  TIPO_PESQUISADOR
 } from '../models/index.js';
 
 const includes = [
@@ -44,9 +46,39 @@ const base = crudFactory({
   nome: 'Pesquisador',
   includes,
   camposBusca: ['nome', 'email', 'matricula'],
-  filtrosPermitidos: ['linhas_id'],
+  filtrosPermitidos: ['linhas_id', 'tipo'],
   ordenacaoPadrao: [['nome', 'ASC']]
 });
+
+/**
+ * GET /admin/pesquisadores
+ * Além da busca e do filtro por linha, aceita ?categoria= (tipo da conta de
+ * acesso) — usado pelo cadastro de projeto para listar só os orientandos.
+ */
+export const listar = asyncHandler(async (req, res) => {
+  const { page, limit, offset } = parsePaginacao(req.query);
+  const categoria = Number(req.query.categoria);
+
+  const include = categoria
+    ? includes.map((inc) =>
+        inc.as === 'usuarios' ? { ...inc, where: { categoria }, required: true } : inc
+      )
+    : includes;
+
+  const { rows, count } = await Pesquisador.findAndCountAll({
+    where: await base.montarWhere(req),
+    include,
+    order: [['nome', 'ASC']],
+    limit,
+    offset,
+    distinct: true
+  });
+  res.json(montarResposta({ rows, count, page, limit }));
+});
+
+/** Tipo padrão do pesquisador conforme a categoria da conta: Orientando → Aluno. */
+const tipoPelaCategoria = (categoria) =>
+  categoria === CATEGORIA_USUARIO.ORIENTANDO ? TIPO_PESQUISADOR.ALUNO : TIPO_PESQUISADOR.PESQUISADOR;
 
 /** Gera um username livre a partir do e-mail. */
 async function gerarUsername(email, transaction) {
@@ -84,7 +116,7 @@ function validarCategoriaPermitida(autor, categoria) {
  * órfão no banco.
  */
 export const criar = asyncHandler(async (req, res) => {
-  const { nome, email, matricula, linhas_id, categoria } = req.body;
+  const { nome, email, matricula, linhas_id, tipo, categoria } = req.body;
 
   validarCategoriaPermitida(req.usuario, categoria);
 
@@ -97,7 +129,13 @@ export const criar = asyncHandler(async (req, res) => {
 
   const criado = await sequelize.transaction(async (transaction) => {
     const pesquisador = await Pesquisador.create(
-      { nome, email: emailNormalizado, matricula, linhas_id },
+      {
+        nome,
+        email: emailNormalizado,
+        matricula,
+        linhas_id,
+        tipo: tipo ?? tipoPelaCategoria(categoria)
+      },
       { transaction }
     );
 
@@ -133,7 +171,7 @@ export const atualizar = asyncHandler(async (req, res) => {
   // pesquisador só edita o próprio cadastro (o dono aqui é o próprio id)
   exigirPosse(req.usuario, { pesquisador_id: pesquisador.id }, 'pesquisador_id');
 
-  const { nome, email, matricula, linhas_id, categoria } = req.body;
+  const { nome, email, matricula, linhas_id, tipo, categoria } = req.body;
   const emailNormalizado = email ? email.trim().toLowerCase() : null;
 
   if (categoria !== undefined && !ehAdmin(req.usuario)) {
@@ -146,7 +184,11 @@ export const atualizar = asyncHandler(async (req, res) => {
         ...(nome !== undefined && { nome }),
         ...(emailNormalizado && { email: emailNormalizado }),
         ...(matricula !== undefined && { matricula }),
-        ...(linhas_id !== undefined && { linhas_id })
+        ...(linhas_id !== undefined && { linhas_id }),
+        // tipo explícito vence; sem ele, mudar a categoria recalcula o tipo
+        ...(tipo !== undefined
+          ? { tipo }
+          : categoria !== undefined && { tipo: tipoPelaCategoria(categoria) })
       },
       { transaction }
     );
@@ -207,4 +249,4 @@ export const remover = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-export const { listar, buscar } = base;
+export const { buscar } = base;

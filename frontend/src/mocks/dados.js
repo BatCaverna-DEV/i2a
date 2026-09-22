@@ -43,6 +43,7 @@ const linha = (n) => linhas.find((l) => l.descricao.startsWith(n));
 export const pesquisadores = [
   {
     id: '22222222-2222-4222-8222-000000000001',
+    tipo: 1,
     nome: 'Bruno Vicente',
     email: 'bruno.vicente@ifma.edu.br',
     matricula: '1234567',
@@ -59,6 +60,7 @@ export const pesquisadores = [
   },
   {
     id: '22222222-2222-4222-8222-000000000002',
+    tipo: 1,
     nome: 'Ana Carolina Lima',
     email: 'ana.lima@ifma.edu.br',
     matricula: '2234567',
@@ -73,6 +75,7 @@ export const pesquisadores = [
   },
   {
     id: '22222222-2222-4222-8222-000000000003',
+    tipo: 1,
     nome: 'Carlos Eduardo Mendes',
     email: 'carlos.mendes@ifma.edu.br',
     matricula: '3234567',
@@ -85,6 +88,7 @@ export const pesquisadores = [
   },
   {
     id: '22222222-2222-4222-8222-000000000004',
+    tipo: 1,
     nome: 'Daniela Sousa Rocha',
     email: 'daniela.rocha@ifma.edu.br',
     matricula: '4234567',
@@ -97,6 +101,7 @@ export const pesquisadores = [
   },
   {
     id: '22222222-2222-4222-8222-000000000005',
+    tipo: 2,
     nome: 'Eduardo Ferreira Lopes',
     email: 'eduardo.lopes@ifma.edu.br',
     matricula: '5234567',
@@ -109,6 +114,7 @@ export const pesquisadores = [
   },
   {
     id: '22222222-2222-4222-8222-000000000006',
+    tipo: 1,
     nome: 'Fernanda Alves Pires',
     email: 'fernanda.pires@ifma.edu.br',
     matricula: '6234567',

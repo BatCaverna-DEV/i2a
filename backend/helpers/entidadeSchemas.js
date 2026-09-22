@@ -16,6 +16,13 @@ export const pesquisadorSchema = z.object({
   email: z.string().email('E-mail inválido.').max(100),
   matricula: opcional(z.string().max(20)),
   linhas_id: opcional(z.string().uuid('Identificador inválido.')),
+  // 1 Pesquisador · 2 Aluno; se omitido, segue a categoria (Orientando → Aluno)
+  tipo: z.coerce
+    .number()
+    .int()
+    .min(1, 'Tipo de pesquisador inválido.')
+    .max(2, 'Tipo de pesquisador inválido.')
+    .optional(),
   categoria: z.coerce
     .number()
     .int()
@@ -56,7 +63,9 @@ export const projetoSchema = z.object({
   resumo: opcional(z.string().max(20000, 'O resumo passou de 20.000 caracteres.')),
   status: z.coerce.number().int().min(0).max(3).default(0),
   tipo: z.coerce.number().int().min(1).max(4).default(1),
-  pesquisador_id: z.string().uuid('Identificador inválido.')
+  pesquisador_id: z.string().uuid('Identificador inválido.'),
+  // ids dos orientandos da equipe; quando enviado, substitui os orientandos atuais
+  orientandos: z.array(z.string().uuid('Identificador inválido.')).max(100).optional()
 });
 
 export const projetoUpdateSchema = projetoSchema.partial();

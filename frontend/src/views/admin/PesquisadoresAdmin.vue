@@ -13,6 +13,12 @@
       <span v-else class="i2a-meta">—</span>
     </template>
 
+    <template #cell(tipo)="{ item }">
+      <BBadge :variant="item.tipo === TIPO.ALUNO ? 'info' : 'primary'">
+        {{ TIPO_PESQUISADOR[item.tipo] ?? '—' }}
+      </BBadge>
+    </template>
+
     <template #cell(acesso)="{ item }">
       <span v-if="conta(item)">
         {{ CATEGORIA_USUARIO[conta(item).categoria] ?? '—' }}
@@ -38,7 +44,16 @@
           </BFormGroup>
         </BCol>
 
-        <BCol md="7">
+        <BCol md="4">
+          <BFormGroup
+            label="Tipo"
+            label-for="tipo"
+            description="Pesquisador (docente) ou aluno orientado."
+          >
+            <BFormSelect id="tipo" v-model.number="form.tipo" :options="opcoesTipo" />
+          </BFormGroup>
+        </BCol>
+        <BCol md="8">
           <BFormGroup
             label="E-mail"
             label-for="email"
@@ -47,7 +62,7 @@
             <BFormInput id="email" v-model="form.email" type="email" required maxlength="100" />
           </BFormGroup>
         </BCol>
-        <BCol md="5">
+        <BCol cols="12">
           <BFormGroup label="Linha de pesquisa" label-for="linha">
             <BFormSelect id="linha" v-model="form.linhas_id" :options="opcoesLinhas" />
           </BFormGroup>
@@ -65,6 +80,7 @@
               v-model.number="form.categoria"
               :options="opcoesCategoria"
               :disabled="editando && !auth.ehAdmin"
+              @update:model-value="(c) => (form.tipo = tipoPelaCategoria(c))"
             />
           </BFormGroup>
 
@@ -93,22 +109,34 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { BRow, BCol, BFormGroup, BFormInput, BFormSelect, BAlert } from 'bootstrap-vue-next';
+import { BRow, BCol, BFormGroup, BFormInput, BFormSelect, BAlert, BBadge } from 'bootstrap-vue-next';
 
 import CrudView from '@/components/admin/CrudView.vue';
 import { pesquisadores, linhas } from '@/services/adminService';
 import { useAuthStore, CATEGORIA } from '@/stores/auth';
-import { CATEGORIA_USUARIO, DESCRICAO_CATEGORIA } from '@/utils/formatadores';
+import { CATEGORIA_USUARIO, DESCRICAO_CATEGORIA, TIPO_PESQUISADOR } from '@/utils/formatadores';
 
 const auth = useAuthStore();
 
 const campos = [
   { key: 'nome', label: 'Nome', sortable: true },
   { key: 'email', label: 'E-mail' },
+  { key: 'tipo', label: 'Tipo' },
   { key: 'linha', label: 'Linha' },
   { key: 'acesso', label: 'Tipo de usuário' },
   { key: 'titulacoes', label: 'Titulações' }
 ];
+
+/** Espelha TIPO_PESQUISADOR do backend: 1 Pesquisador · 2 Aluno. */
+const TIPO = Object.freeze({ PESQUISADOR: 1, ALUNO: 2 });
+const opcoesTipo = Object.entries(TIPO_PESQUISADOR).map(([value, text]) => ({
+  value: Number(value),
+  text
+}));
+
+/** Sugestão de tipo ao escolher a categoria: Orientando → Aluno. */
+const tipoPelaCategoria = (categoria) =>
+  categoria === CATEGORIA.ORIENTANDO ? TIPO.ALUNO : TIPO.PESQUISADOR;
 
 /** A API devolve as contas do pesquisador em `usuarios`. */
 const conta = (item) => item.usuarios?.[0] ?? null;
@@ -129,7 +157,8 @@ const formularioPadrao = () => ({
   email: '',
   matricula: '',
   linhas_id: null,
-  categoria: auth.ehAdmin ? CATEGORIA.PESQUISADOR : CATEGORIA.ORIENTANDO
+  categoria: auth.ehAdmin ? CATEGORIA.PESQUISADOR : CATEGORIA.ORIENTANDO,
+  tipo: auth.ehAdmin ? TIPO.PESQUISADOR : TIPO.ALUNO
 });
 
 const paraFormulario = (item) => ({
@@ -137,7 +166,8 @@ const paraFormulario = (item) => ({
   email: item.email,
   matricula: item.matricula ?? '',
   linhas_id: item.linhas_id ?? null,
-  categoria: conta(item)?.categoria ?? CATEGORIA.ORIENTANDO
+  categoria: conta(item)?.categoria ?? CATEGORIA.ORIENTANDO,
+  tipo: item.tipo ?? TIPO.PESQUISADOR
 });
 
 onMounted(async () => {

@@ -26,6 +26,12 @@ export const TIPO_PRODUCAO = {
   99: 'Outro'
 };
 
+/** Espelha TIPO_PESQUISADOR do backend (coluna pesquisador.tipo). */
+export const TIPO_PESQUISADOR = {
+  1: 'Pesquisador',
+  2: 'Aluno'
+};
+
 /**
  * Espelha CATEGORIA_USUARIO do backend.
  *   1 Administrador — gerencia todos os dados

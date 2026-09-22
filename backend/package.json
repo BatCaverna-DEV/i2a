@@ -12,7 +12,8 @@
     "dev": "node --watch index.js",
     "db": "node helpers/seed.js",
     "db:google": "node helpers/migrar-google.js",
-    "db:papeis": "node helpers/migrar-papeis.js"
+    "db:papeis": "node helpers/migrar-papeis.js",
+    "db:tipo": "node helpers/migrar-tipo-pesquisador.js"
   },
   "keywords": [
     "i2a",

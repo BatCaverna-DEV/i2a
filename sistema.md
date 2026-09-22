@@ -136,7 +136,7 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 | Tabela | Campos principais | Relacionamentos |
 |---|---|---|
 | `linhas` | `descricao` | 1:N com `pesquisador` |
-| `pesquisador` | `nome`, `email` (único), `matricula`, `linhas_id` | núcleo do modelo |
+| `pesquisador` | `nome`, `email` (único), `matricula`, `tipo`, `linhas_id` | núcleo do modelo |
 | `usuarios` | `email` (único, autoriza o login), `username`, `google_sub`, `categoria`, `status` | N:1 com `pesquisador` |
 | `titulacao` | `titulo`, `instituicao`, `ano` | N:1 com `pesquisador` |
 | `cursos` | `titulo` VARCHAR(255), `resumo` TEXT, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
@@ -163,6 +163,7 @@ no `sync`. Comportamento ao apagar o registro-pai:
 
 | Coluna | Valores |
 |---|---|
+| `pesquisador.tipo` | 1 Pesquisador · 2 Aluno (orientando) — padrão 1; no cadastro segue a categoria (Orientando → Aluno) |
 | `usuarios.categoria` | 1 Administrador · 2 Pesquisador · 3 Orientando |
 | `usuarios.status` | 0 Inativo · 1 Ativo · 2 Bloqueado |
 | `projetos.status` | 0 Em elaboração · 1 Em andamento · 2 Concluído · 3 Cancelado |
@@ -307,7 +308,7 @@ Prefixo padrão: `/api`.
 |---|---|---|
 | GET | `/publico/estatisticas` | números da home e produção por ano |
 | GET | `/publico/linhas` | linhas com contagem de pesquisadores |
-| GET | `/publico/pesquisadores` | lista paginada (`?q`, `?linha`) |
+| GET | `/publico/pesquisadores` | lista paginada (`?q`, `?linha`, `?tipo`) |
 | GET | `/publico/pesquisadores/:id` | perfil com titulações, projetos e produções |
 | GET | `/publico/projetos` | lista paginada (`?status`, `?tipo`) |
 | GET | `/publico/projetos/:id` | projeto com coordenador e equipe |
@@ -332,6 +333,17 @@ Rotas adicionais:
 | POST | `/admin/producoes/:id/autores` | vincula autor à produção |
 | DELETE | `/admin/producoes/:id/autores/:pesquisadorId` | remove a autoria |
 | POST | `/admin/usuarios/:id/desvincular` | admin solta o vínculo Google do usuário |
+
+Parâmetros e campos extras:
+
+- `GET /admin/pesquisadores?categoria=3` lista só quem tem conta daquele tipo (usado para
+  montar a lista de orientandos no cadastro de projeto).
+- `POST` e `PUT /admin/projetos` aceitam `orientandos: [uuid]`. Quando o campo vem, os
+  orientandos do projeto em `orientacacoes` passam a ser exatamente essa lista, na mesma
+  transação do projeto; membros que não são orientandos continuam na equipe. Ids que não
+  pertencem a uma conta do tipo Orientando são recusados com 400.
+- No formulário de projeto, **Cadastrar orientando** cria o pesquisador com conta do tipo
+  Orientando (`POST /admin/pesquisadores`, `categoria: 3`) e já o marca no projeto.
 
 ### Formatos de resposta
 

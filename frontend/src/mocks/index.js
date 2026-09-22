@@ -22,7 +22,7 @@ const repo = {
   }),
   pesquisadores: criarRepositorio(pesquisadoresComConta, {
     camposBusca: ['nome', 'email', 'matricula'],
-    filtros: ['linhas_id'],
+    filtros: ['linhas_id', 'tipo'],
     ordenar: (a, b) => a.nome.localeCompare(b.nome)
   }),
   projetos: criarRepositorio(dados.projetos, {
@@ -50,6 +50,24 @@ const repo = {
     ordenar: (a, b) => a.username.localeCompare(b.username)
   })
 };
+
+/** { id, nome } do pesquisador, no formato dos includes da API. */
+function resumoPesquisador(id) {
+  const pesq = repo.pesquisadores.todos().find((p) => p.id === id);
+  return pesq ? { id: pesq.id, nome: pesq.nome } : null;
+}
+
+/**
+ * Espelha a sincronização da API: os orientandos da equipe passam a ser
+ * exatamente `ids`; os demais membros continuam.
+ */
+function aplicarOrientandos(equipe, ids) {
+  const ehOrientando = (id) =>
+    repo.usuarios.todos().some((u) => u.pesquisador_id === id && u.categoria === 3);
+  const mantidos = equipe.filter((m) => !ehOrientando(m.id));
+  const novos = [...new Set(ids)].map(resumoPesquisador).filter(Boolean);
+  return [...mantidos, ...novos];
+}
 
 function inscricoesAbertas(curso) {
   if (!curso.inscricoes_inicio || !curso.inscricoes_fim) return false;
@@ -87,10 +105,10 @@ export const publico = {
 
   async pesquisadores(params = {}) {
     await atraso();
-    const alvo = params.linha ? { linhas_id: params.linha, q: params.q } : params;
+    const alvo = params.linha ? { linhas_id: params.linha, q: params.q, tipo: params.tipo } : params;
     const lista = filtrar(dados.pesquisadores, alvo, {
       camposBusca: ['nome'],
-      filtros: ['linhas_id']
+      filtros: ['linhas_id', 'tipo']
     }).sort((a, b) => a.nome.localeCompare(b.nome));
     return paginar(lista, { page: params.page, limit: params.limit ?? 24 });
   },
@@ -162,10 +180,25 @@ export const admin = {
     ...repo.pesquisadores,
     completo: (id) => publico.pesquisador(id),
 
+    /** Espelha o ?categoria= da API (tipo da conta de acesso). */
+    async listar(params = {}) {
+      const { categoria, ...resto } = params;
+      if (!categoria) return repo.pesquisadores.listar(resto);
+      const todos = await repo.pesquisadores.listar({ ...resto, page: 1, limit: 10_000 });
+      const lista = todos.data.filter((p) =>
+        (p.usuarios ?? []).some((u) => u.categoria === Number(categoria))
+      );
+      return paginar(lista, resto);
+    },
+
     /** Espelha o backend: cadastrar pesquisador cria a conta de acesso junto. */
     async criar(payload) {
       const { categoria = 3, ...dadosPesquisador } = payload;
-      const pesquisador = await repo.pesquisadores.criar(dadosPesquisador);
+      // mesmo padrão da API: sem tipo explícito, Orientando vira Aluno (2)
+      const pesquisador = await repo.pesquisadores.criar({
+        ...dadosPesquisador,
+        tipo: dadosPesquisador.tipo ?? (categoria === 3 ? 2 : 1)
+      });
 
       const conta = await repo.usuarios.criar({
         username: String(payload.email ?? '').split('@')[0],
@@ -198,6 +231,26 @@ export const admin = {
 
   projetos: {
     ...repo.projetos,
+
+    async criar(payload) {
+      const { orientandos, ...dadosProjeto } = payload;
+      return repo.projetos.criar({
+        ...dadosProjeto,
+        coordenador: resumoPesquisador(dadosProjeto.pesquisador_id),
+        equipe: aplicarOrientandos([], orientandos ?? [])
+      });
+    },
+
+    async atualizar(id, payload) {
+      const { orientandos, ...dadosProjeto } = payload;
+      const atual = await repo.projetos.buscar(id);
+      return repo.projetos.atualizar(id, {
+        ...dadosProjeto,
+        coordenador: resumoPesquisador(dadosProjeto.pesquisador_id ?? atual.pesquisador_id),
+        ...(orientandos && { equipe: aplicarOrientandos(atual.equipe ?? [], orientandos) })
+      });
+    },
+
     async adicionarMembro(id, pesquisador_id) {
       const projeto = await repo.projetos.buscar(id);
       const pesq = dados.pesquisadores.find((x) => x.id === pesquisador_id);

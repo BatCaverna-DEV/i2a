@@ -4,7 +4,14 @@ import crudFactory from './crudFactory.js';
 import asyncHandler from '../helpers/asyncHandler.js';
 import ApiError from '../helpers/ApiError.js';
 import { ehAdmin, ehOrientando, exigirPosse } from '../helpers/auth.js';
-import { Projeto, Pesquisador, Orientacao } from '../models/index.js';
+import {
+  sequelize,
+  Projeto,
+  Pesquisador,
+  Orientacao,
+  Usuario,
+  CATEGORIA_USUARIO
+} from '../models/index.js';
 
 const includes = [
   { model: Pesquisador, as: 'coordenador', attributes: ['id', 'nome', 'email'] },
@@ -43,6 +50,90 @@ const base = crudFactory({
   campoDono: 'pesquisador_id'
 });
 
+/** Ids, dentre os informados, cuja conta de acesso é do tipo Orientando. */
+async function filtrarOrientandos(ids, transaction) {
+  if (ids.length === 0) return new Set();
+  const contas = await Usuario.findAll({
+    where: { pesquisador_id: { [Op.in]: ids }, categoria: CATEGORIA_USUARIO.ORIENTANDO },
+    attributes: ['pesquisador_id'],
+    transaction
+  });
+  return new Set(contas.map((c) => c.pesquisador_id));
+}
+
+/**
+ * Faz os orientandos do projeto (tabela orientacacoes) ficarem exatamente
+ * iguais à lista recebida do formulário. Pesquisadores que não são
+ * orientandos continuam na equipe — esta lista só governa os orientandos.
+ */
+async function sincronizarOrientandos(projetoId, ids, transaction) {
+  const desejados = [...new Set(ids)];
+
+  const validos = await filtrarOrientandos(desejados, transaction);
+  if (validos.size !== desejados.length) {
+    throw ApiError.badRequest(
+      'Só é possível vincular como orientando quem tem o tipo de usuário Orientando.'
+    );
+  }
+
+  const vinculos = await Orientacao.findAll({
+    where: { projetos_id: projetoId },
+    attributes: ['pesquisador_id'],
+    transaction
+  });
+  const atuais = await filtrarOrientandos(
+    vinculos.map((v) => v.pesquisador_id),
+    transaction
+  );
+
+  const sair = [...atuais].filter((id) => !validos.has(id));
+  const entrar = desejados.filter((id) => !atuais.has(id));
+
+  if (sair.length > 0) {
+    await Orientacao.destroy({
+      where: { projetos_id: projetoId, pesquisador_id: { [Op.in]: sair } },
+      transaction
+    });
+  }
+  if (entrar.length > 0) {
+    await Orientacao.bulkCreate(
+      entrar.map((pesquisador_id) => ({ projetos_id: projetoId, pesquisador_id })),
+      { transaction }
+    );
+  }
+}
+
+/** POST /admin/projetos — cria o projeto e, se vierem, vincula os orientandos. */
+export const criar = asyncHandler(async (req, res) => {
+  const { orientandos, ...dados } = req.body;
+
+  const projeto = await sequelize.transaction(async (transaction) => {
+    const criado = await Projeto.create(dados, { transaction });
+    if (orientandos) await sincronizarOrientandos(criado.id, orientandos, transaction);
+    return criado;
+  });
+
+  const completo = await Projeto.findByPk(projeto.id, { include: includes });
+  res.status(201).json(completo);
+});
+
+/** PUT /admin/projetos/:id — atualiza o projeto e a lista de orientandos. */
+export const atualizar = asyncHandler(async (req, res) => {
+  const projeto = await Projeto.findByPk(req.params.id);
+  if (!projeto) throw ApiError.notFound('Projeto não encontrado.');
+  exigirPosse(req.usuario, projeto, 'pesquisador_id');
+
+  const { orientandos, ...dados } = req.body;
+
+  await sequelize.transaction(async (transaction) => {
+    await projeto.update(dados, { transaction });
+    if (orientandos) await sincronizarOrientandos(projeto.id, orientandos, transaction);
+  });
+
+  const completo = await Projeto.findByPk(projeto.id, { include: includes });
+  res.json(completo);
+});
+
 /** POST /admin/projetos/:id/equipe — vincula um pesquisador ao projeto. */
 export const adicionarMembro = asyncHandler(async (req, res) => {
   const { pesquisador_id } = req.body;
@@ -74,4 +165,4 @@ export const removerMembro = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-export const { listar, buscar, criar, atualizar, remover } = base;
+export const { listar, buscar, remover } = base;
