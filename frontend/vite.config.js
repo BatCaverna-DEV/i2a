@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    // pasta em que o site é publicado: '/' na raiz do domínio, '/i2a/' numa
+    // subpasta. Vira import.meta.env.BASE_URL para o router e os redirecionamentos.
+    base: env.VITE_BASE || '/',
     plugins: [
       vue(),
       // auto-importa os componentes <B...> da bootstrap-vue-next.

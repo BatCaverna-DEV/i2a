@@ -127,7 +127,8 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  // BASE_URL segue o `base` do vite.config.js (ex.: /i2a/ quando em subpasta)
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior: (to, from, saved) => saved ?? { top: 0 }
 });

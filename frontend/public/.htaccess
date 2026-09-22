@@ -18,17 +18,17 @@ DirectoryIndex index.html
 # a página ou abrir um link direto devolve 404 do Apache.
 # Tudo o que não for arquivo ou pasta real vai para o index.html.
 #
-# Se o site ficar numa subpasta (ex.: https://dominio/i2a/), troque
-# RewriteBase para /i2a/ e ajuste `base: '/i2a/'` no vite.config.js.
+# A regra é relativa à pasta deste arquivo, então funciona tanto na raiz
+# do domínio quanto numa subpasta (ex.: https://i2alab.com.br/i2a/) sem
+# alteração — basta o build ter sido gerado com o VITE_BASE certo.
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
 
   RewriteRule ^index\.html$ - [L]
 
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteRule . index.html [L]
 </IfModule>
 
 # -----------------------------------------------------------

@@ -62,8 +62,10 @@ http.interceptors.response.use(
 
       localStorage.removeItem(CHAVE_ACCESS);
       localStorage.removeItem(CHAVE_REFRESH);
-      if (!window.location.pathname.startsWith('/admin/login')) {
-        window.location.assign('/admin/login');
+      // respeita a subpasta de publicação (VITE_BASE), ex.: /i2a/admin/login
+      const login = `${import.meta.env.BASE_URL}admin/login`;
+      if (!window.location.pathname.startsWith(login)) {
+        window.location.assign(login);
       }
     }
 
