@@ -44,7 +44,7 @@ const base = crudFactory({
   nome: 'Projeto',
   includes,
   camposBusca: ['titulo', 'resumo'],
-  filtrosPermitidos: ['status', 'tipo', 'pesquisador_id'],
+  filtrosPermitidos: ['status', 'tipo', 'ano', 'pesquisador_id'],
   ordenacaoPadrao: [['titulo', 'ASC']],
   escopo: escopoPorPapel,
   campoDono: 'pesquisador_id'

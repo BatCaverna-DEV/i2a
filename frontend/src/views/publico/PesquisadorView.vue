@@ -48,7 +48,9 @@
               >
                 {{ p.titulo }}
               </RouterLink>
-              <span class="i2a-meta ms-2">{{ STATUS_PROJETO[p.status]?.rotulo }}</span>
+              <span class="i2a-meta ms-2">
+                {{ STATUS_PROJETO[p.status]?.rotulo }}<template v-if="p.ano"> · {{ p.ano }}</template>
+              </span>
             </li>
           </ul>
 

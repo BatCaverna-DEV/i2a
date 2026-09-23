@@ -140,7 +140,7 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 | `usuarios` | `email` (único, autoriza o login), `username`, `google_sub`, `categoria`, `status` | N:1 com `pesquisador` |
 | `titulacao` | `titulo`, `instituicao`, `ano` | N:1 com `pesquisador` |
 | `cursos` | `titulo` VARCHAR(255), `resumo` TEXT, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
-| `projetos` | `titulo` VARCHAR(255), `resumo` TEXT, `status`, `tipo` | N:1 com `pesquisador` (coordenador) |
+| `projetos` | `titulo` VARCHAR(255), `resumo` TEXT, `ano` (início, opcional), `status`, `tipo` | N:1 com `pesquisador` (coordenador) |
 | `orientacacoes` | — | N:N entre `pesquisador` e `projetos` |
 | `producao` | `titulo` VARCHAR(255), `ano`, `veiculo` VARCHAR(255), `resumo` TEXT (+ campos abaixo) | — |
 | `autores` | `ordem` | N:N entre `pesquisador` e `producao` |
@@ -310,7 +310,7 @@ Prefixo padrão: `/api`.
 | GET | `/publico/linhas` | linhas com contagem de pesquisadores |
 | GET | `/publico/pesquisadores` | lista paginada (`?q`, `?linha`, `?tipo`) |
 | GET | `/publico/pesquisadores/:id` | perfil com titulações, projetos e produções |
-| GET | `/publico/projetos` | lista paginada (`?status`, `?tipo`) |
+| GET | `/publico/projetos` | lista paginada (`?status`, `?tipo`, `?ano`) |
 | GET | `/publico/projetos/:id` | projeto com coordenador e equipe |
 | GET | `/publico/cursos` | lista paginada (`?abertos=1`) |
 | GET | `/publico/cursos/:id` | curso com responsável |

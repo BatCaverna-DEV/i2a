@@ -5,7 +5,9 @@
  *  - no diagrama `projetos.id` é INT AUTO_INCREMENT; aqui é UUID, para ficar
  *    uniforme com as demais tabelas;
  *  - `titulo` e `resumo` eram VARCHAR(45). Quarenta e cinco caracteres não
- *    cabem nem um título de projeto, então viraram VARCHAR(255) e TEXT.
+ *    cabem nem um título de projeto, então viraram VARCHAR(255) e TEXT;
+ *  - `ano` (ano de início) não existe no DER. É opcional porque os projetos
+ *    cadastrados antes dele não têm o dado.
  */
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
@@ -48,6 +50,16 @@ const Projeto = sequelize.define(
       // TEXT: até ~65 mil caracteres, suficiente para o resumo inteiro
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    ano: {
+      // ano de início do projeto
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        isInt: { msg: 'Ano inválido.' },
+        min: { args: [1900], msg: 'Ano inválido.' },
+        max: { args: [2100], msg: 'Ano inválido.' }
+      }
     },
     status: {
       type: DataTypes.INTEGER,

@@ -34,6 +34,7 @@
           </p>
           <p class="i2a-meta mb-0">
             {{ TIPO_PROJETO[p.tipo] ?? '—' }}
+            <span v-if="p.ano"> · {{ p.ano }}</span>
             <span v-if="p.coordenador"> · {{ p.coordenador.nome }}</span>
           </p>
         </RouterLink>

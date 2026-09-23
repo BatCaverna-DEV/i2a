@@ -18,6 +18,10 @@
       </BBadge>
     </template>
 
+    <template #cell(ano)="{ item }">
+      {{ item.ano ?? '—' }}
+    </template>
+
     <template #cell(tipo)="{ item }">
       {{ TIPO_PROJETO[item.tipo] ?? '—' }}
     </template>
@@ -52,12 +56,24 @@
             </p>
           </BFormGroup>
         </BCol>
-        <BCol md="4">
+        <BCol md="2">
+          <BFormGroup label="Ano" label-for="ano" description="Início.">
+            <BFormInput
+              id="ano"
+              v-model.number="form.ano"
+              type="number"
+              min="1900"
+              max="2100"
+              placeholder="2026"
+            />
+          </BFormGroup>
+        </BCol>
+        <BCol md="3">
           <BFormGroup label="Situação" label-for="status">
             <BFormSelect id="status" v-model.number="form.status" :options="opcoesStatus" />
           </BFormGroup>
         </BCol>
-        <BCol md="4">
+        <BCol md="3">
           <BFormGroup label="Tipo" label-for="tipo">
             <BFormSelect id="tipo" v-model.number="form.tipo" :options="opcoesTipo" />
           </BFormGroup>
@@ -203,6 +219,7 @@ import { STATUS_PROJETO, TIPO_PROJETO } from '@/utils/formatadores';
 
 const campos = [
   { key: 'titulo', label: 'Título', sortable: true },
+  { key: 'ano', label: 'Ano', sortable: true },
   { key: 'tipo', label: 'Tipo' },
   { key: 'status', label: 'Situação' },
   { key: 'coordenador', label: 'Coordenador' },
@@ -231,6 +248,7 @@ const orientandosFiltrados = computed(() => {
 const formularioPadrao = () => ({
   titulo: '',
   resumo: '',
+  ano: new Date().getFullYear(),
   status: 0,
   tipo: 1,
   pesquisador_id: null,
@@ -244,6 +262,7 @@ const paraFormulario = (item) => {
   return {
     titulo: item.titulo,
     resumo: item.resumo ?? '',
+    ano: item.ano ?? null,
     status: item.status,
     tipo: item.tipo,
     pesquisador_id: item.pesquisador_id,

@@ -13,7 +13,8 @@
     "db": "node helpers/seed.js",
     "db:google": "node helpers/migrar-google.js",
     "db:papeis": "node helpers/migrar-papeis.js",
-    "db:tipo": "node helpers/migrar-tipo-pesquisador.js"
+    "db:tipo": "node helpers/migrar-tipo-pesquisador.js",
+    "db:ano-projeto": "node helpers/migrar-ano-projeto.js"
   },
   "keywords": [
     "i2a",

@@ -90,7 +90,7 @@ export const pesquisador = asyncHandler(async (req, res) => {
       {
         model: Projeto,
         as: 'projetos',
-        attributes: ['id', 'titulo', 'status', 'tipo'],
+        attributes: ['id', 'titulo', 'ano', 'status', 'tipo'],
         through: { attributes: [] }
       }
     ]
@@ -105,9 +105,10 @@ export const projetos = asyncHandler(async (req, res) => {
   const where = { status: { [Op.ne]: STATUS_PROJETO.EM_ELABORACAO } };
   if (req.query.status !== undefined) where.status = Number(req.query.status);
   if (req.query.tipo !== undefined) where.tipo = Number(req.query.tipo);
+  if (req.query.ano) where.ano = Number(req.query.ano);
 
   const { rows, count } = await Projeto.findAndCountAll({
-    attributes: ['id', 'titulo', 'resumo', 'status', 'tipo'],
+    attributes: ['id', 'titulo', 'resumo', 'ano', 'status', 'tipo'],
     where,
     include: [{ model: Pesquisador, as: 'coordenador', attributes: ['id', 'nome'] }],
     order: [['titulo', 'ASC']],
@@ -121,7 +122,7 @@ export const projetos = asyncHandler(async (req, res) => {
 /** GET /publico/projetos/:id */
 export const projeto = asyncHandler(async (req, res) => {
   const registro = await Projeto.findByPk(req.params.id, {
-    attributes: ['id', 'titulo', 'resumo', 'status', 'tipo'],
+    attributes: ['id', 'titulo', 'resumo', 'ano', 'status', 'tipo'],
     include: [
       { model: Pesquisador, as: 'coordenador', attributes: ['id', 'nome'] },
       { model: Pesquisador, as: 'equipe', attributes: ['id', 'nome'], through: { attributes: [] } }

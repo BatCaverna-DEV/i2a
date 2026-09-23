@@ -27,7 +27,7 @@ const repo = {
   }),
   projetos: criarRepositorio(dados.projetos, {
     camposBusca: ['titulo', 'resumo'],
-    filtros: ['status', 'tipo', 'pesquisador_id'],
+    filtros: ['status', 'tipo', 'ano', 'pesquisador_id'],
     ordenar: (a, b) => a.titulo.localeCompare(b.titulo)
   }),
   cursos: criarRepositorio(dados.cursos, {
@@ -141,7 +141,7 @@ export const publico = {
 
   async projetos(params = {}) {
     await atraso();
-    const lista = filtrar(dados.projetos, params, { filtros: ['status', 'tipo'] })
+    const lista = filtrar(dados.projetos, params, { filtros: ['status', 'tipo', 'ano'] })
       .filter((pr) => (params.status === undefined ? pr.status !== 0 : true))
       .sort((a, b) => a.titulo.localeCompare(b.titulo));
     return paginar(lista, { page: params.page, limit: params.limit ?? 12 });

@@ -36,8 +36,9 @@ npm run dev       # node --watch index.js
 cd frontend && npm install && npm run dev
 ```
 
-Scripts extras do backend: `npm run db:google`, `npm run db:papeis` e `npm run db:tipo`
-(migrações pontuais: `usuarios` para o login Google, papéis, e a coluna `pesquisador.tipo`). Não há migrations versionadas: o
+Scripts extras do backend: `npm run db:google`, `npm run db:papeis`, `npm run db:tipo` e
+`npm run db:ano-projeto` (migrações pontuais: login Google, papéis, `pesquisador.tipo` e
+`projetos.ano`). Coluna nova no model exige rodar a migração ANTES de reiniciar a API. Não há migrations versionadas: o
 schema vem do `sequelize.sync` (`DB_SYNC`, `DB_SYNC_ALTER`).
 
 `VITE_USE_MOCKS=true` faz o frontend rodar sem backend (dados em `src/mocks/`, login

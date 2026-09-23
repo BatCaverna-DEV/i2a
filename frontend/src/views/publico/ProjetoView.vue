@@ -11,6 +11,7 @@
         <BCol lg="8">
           <p class="i2a-eyebrow mb-2">
             {{ TIPO_PROJETO[dados.tipo] ?? '—' }} · {{ STATUS_PROJETO[dados.status]?.rotulo }}
+            <template v-if="dados.ano"> · desde {{ dados.ano }}</template>
           </p>
           <h1 class="h2 fw-bold mb-3">{{ dados.titulo }}</h1>
           <!-- white-space: pre-line mantém os parágrafos digitados no painel -->

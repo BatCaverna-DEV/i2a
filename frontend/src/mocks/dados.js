@@ -136,6 +136,7 @@ const p = (i) => {
 export const projetos = [
   {
     id: '33333333-3333-4333-8333-000000000001',
+    ano: 2024,
     titulo: 'Detecção precoce de doenças crônicas a partir de prontuários eletrônicos da atenção básica',
     resumo:
       'O projeto investiga modelos preditivos capazes de sinalizar risco de doenças ' +
@@ -154,6 +155,7 @@ export const projetos = [
   },
   {
     id: '33333333-3333-4333-8333-000000000002',
+    ano: 2023,
     titulo: 'Mapeamento do uso do solo no MATOPIBA',
     resumo: 'Classificação de séries temporais de imagens de satélite.',
     status: 1,
@@ -164,6 +166,7 @@ export const projetos = [
   },
   {
     id: '33333333-3333-4333-8333-000000000003',
+    ano: 2021,
     titulo: 'IA na escola: formação docente',
     resumo: 'Oficinas de pensamento computacional e IA para professores da rede.',
     status: 1,
@@ -174,6 +177,7 @@ export const projetos = [
   },
   {
     id: '33333333-3333-4333-8333-000000000004',
+    ano: 2025,
     titulo: 'Corpus do português maranhense',
     resumo: 'Construção de corpus anotado para tarefas de PLN regionais.',
     status: 2,
@@ -184,6 +188,7 @@ export const projetos = [
   },
   {
     id: '33333333-3333-4333-8333-000000000005',
+    ano: 2024,
     titulo: 'Otimização de rotas da merenda escolar',
     resumo: 'Heurísticas para distribuição em municípios do interior.',
     status: 0,
@@ -194,6 +199,7 @@ export const projetos = [
   },
   {
     id: '33333333-3333-4333-8333-000000000006',
+    ano: 2026,
     titulo: 'Aprendizagem semissupervisionada em stream',
     resumo: 'Rotulagem automática para fluxos contínuos de dados.',
     status: 1,
