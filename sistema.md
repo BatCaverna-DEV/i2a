@@ -308,7 +308,7 @@ Prefixo padrão: `/api`.
 |---|---|---|
 | GET | `/publico/estatisticas` | números da home e produção por ano |
 | GET | `/publico/linhas` | linhas com contagem de pesquisadores |
-| GET | `/publico/pesquisadores` | lista paginada (`?q`, `?linha`, `?tipo`) |
+| GET | `/publico/pesquisadores` | lista paginada (`?q`, `?linha`, `?tipo`); sem administradores, pesquisadores antes de alunos |
 | GET | `/publico/pesquisadores/:id` | perfil com titulações, projetos e produções |
 | GET | `/publico/projetos` | lista paginada (`?status`, `?tipo`, `?ano`) |
 | GET | `/publico/projetos/:id` | projeto com coordenador e equipe |

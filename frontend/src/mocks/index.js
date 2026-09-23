@@ -120,10 +120,11 @@ export const publico = {
   async pesquisadores(params = {}) {
     await atraso();
     const alvo = params.linha ? { linhas_id: params.linha, q: params.q, tipo: params.tipo } : params;
-    const lista = filtrar(dados.pesquisadores, alvo, {
+    // mesma regra da API: sem administradores, pesquisadores antes de alunos
+    const lista = filtrar(pesquisadoresContados(), alvo, {
       camposBusca: ['nome'],
       filtros: ['linhas_id', 'tipo']
-    }).sort((a, b) => a.nome.localeCompare(b.nome));
+    }).sort((a, b) => (a.tipo ?? 1) - (b.tipo ?? 1) || a.nome.localeCompare(b.nome));
     return paginar(lista, { page: params.page, limit: params.limit ?? 24 });
   },
 

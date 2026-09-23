@@ -29,30 +29,42 @@
 
       <EstadoVazio v-else-if="!itens.length" icone="bi-people" titulo="Nenhum pesquisador encontrado" />
 
-      <BRow v-else class="g-3">
-        <BCol v-for="p in itens" :key="p.id" md="6" lg="4">
-          <RouterLink
-            :to="{ name: 'pesquisador', params: { id: p.id } }"
-            class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
-          >
-            <div class="d-flex align-items-center gap-3 mb-3">
-              <span class="i2a-avatar">{{ iniciais(p.nome) }}</span>
-              <div style="min-width: 0">
-                <h2 class="h6 fw-semibold mb-0">{{ p.nome }}</h2>
-                <p class="i2a-meta mb-0">
-                  {{ p.papel ?? (p.tipo === 2 ? 'Aluno' : 'Pesquisador') }}
+      <template v-else>
+        <section v-for="grupo in grupos" :key="grupo.tipo" class="mb-5">
+          <h2 class="h5 fw-bold d-flex align-items-center gap-2 mb-3">
+            <span class="i2a-icone" :class="grupo.cor" style="width: 2.25rem; height: 2.25rem; font-size: 1rem">
+              <i :class="`bi ${grupo.icone}`" />
+            </span>
+            {{ grupo.titulo }}
+            <span class="i2a-meta fw-normal">· {{ grupo.itens.length }}</span>
+          </h2>
+
+          <BRow class="g-3">
+            <BCol v-for="p in grupo.itens" :key="p.id" md="6" lg="4">
+              <RouterLink
+                :to="{ name: 'pesquisador', params: { id: p.id } }"
+                class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
+              >
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <span class="i2a-avatar">{{ iniciais(p.nome) }}</span>
+                  <div style="min-width: 0">
+                    <h3 class="h6 fw-semibold mb-0">{{ p.nome }}</h3>
+                    <p class="i2a-meta mb-0">
+                      {{ p.papel ?? (p.tipo === 2 ? 'Aluno' : 'Pesquisador') }}
+                    </p>
+                  </div>
+                </div>
+                <p class="mb-2">
+                  <span class="i2a-selo">{{ p.linha?.descricao ?? 'Sem linha definida' }}</span>
                 </p>
-              </div>
-            </div>
-            <p class="mb-2">
-              <span class="i2a-selo">{{ p.linha?.descricao ?? 'Sem linha definida' }}</span>
-            </p>
-            <p v-if="p.resumo" class="small text-body-secondary i2a-truncate-3 mb-0">
-              {{ p.resumo }}
-            </p>
-          </RouterLink>
-        </BCol>
-      </BRow>
+                <p v-if="p.resumo" class="small text-body-secondary i2a-truncate-3 mb-0">
+                  {{ p.resumo }}
+                </p>
+              </RouterLink>
+            </BCol>
+          </BRow>
+        </section>
+      </template>
 
       <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
         <BPagination
@@ -67,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { BContainer, BRow, BCol, BFormInput, BFormSelect, BPagination } from 'bootstrap-vue-next';
 
@@ -87,6 +99,22 @@ const busca = ref('');
 const linhaSelecionada = ref(route.query.linha ?? null);
 const opcoesLinhas = ref([{ value: null, text: 'Todas as linhas' }]);
 const carregando = ref(true);
+
+/**
+ * A API já devolve pesquisadores antes de alunos; aqui só separamos a página
+ * atual em dois blocos com título. Bloco vazio não aparece.
+ */
+const grupos = computed(() =>
+  [
+    { tipo: 1, titulo: 'Pesquisadores', icone: 'bi-person-workspace', cor: '' },
+    { tipo: 2, titulo: 'Alunos', icone: 'bi-mortarboard', cor: 'i2a-icone--ciano' }
+  ]
+    .map((g) => ({
+      ...g,
+      itens: itens.value.filter((p) => (p.tipo ?? 1) === g.tipo)
+    }))
+    .filter((g) => g.itens.length)
+);
 
 async function carregar(novaPagina = pagina.value) {
   carregando.value = true;

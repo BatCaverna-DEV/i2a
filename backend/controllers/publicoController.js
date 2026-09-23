@@ -54,10 +54,14 @@ export const linhas = asyncHandler(async (req, res) => {
   res.json({ data: registros });
 });
 
-/** GET /publico/pesquisadores — equipe do grupo (?q, ?linha, ?tipo=1|2). */
+/**
+ * GET /publico/pesquisadores — equipe do grupo (?q, ?linha, ?tipo=1|2).
+ * Quem tem conta de Administrador não aparece. A lista vem com os
+ * pesquisadores primeiro e os alunos depois, cada grupo em ordem alfabética.
+ */
 export const pesquisadores = asyncHandler(async (req, res) => {
   const { page, limit, offset } = parsePaginacao(req.query, { limitePadrao: 24 });
-  const where = {};
+  const where = { ...naoAdministrador };
   if (req.query.linha) where.linhas_id = req.query.linha;
   if (req.query.tipo) where.tipo = Number(req.query.tipo);
   if (req.query.q) where.nome = { [Op.like]: `%${req.query.q}%` };
@@ -66,7 +70,10 @@ export const pesquisadores = asyncHandler(async (req, res) => {
     attributes: ['id', 'nome', 'email', 'tipo', 'linhas_id'],
     where,
     include: [{ model: Linha, as: 'linha', attributes: ['id', 'descricao'] }],
-    order: [['nome', 'ASC']],
+    order: [
+      ['tipo', 'ASC'], // 1 Pesquisador antes de 2 Aluno
+      ['nome', 'ASC']
+    ],
     limit,
     offset,
     distinct: true

@@ -150,7 +150,8 @@ responde por cursos, por causa do RESTRICT).
 ### Endpoints
 
 - `/auth`: `POST google`, `POST refresh`, `GET eu`, `POST desvincular`
-- `/publico` (sem auth): `estatisticas`, `linhas`, `pesquisadores[/:id]`, `projetos[/:id]`
+- `/publico` (sem auth): `estatisticas`, `linhas`, `pesquisadores[/:id]` (lista sem
+  administradores, ordenada por `tipo` e nome), `projetos[/:id]`
   (lista oculta status 0), `cursos[/:id]` (`?abertos=1`), `producoes` (`?q ?ano ?tipo`)
 - `/admin`: CRUD em `pesquisadores`, `linhas`, `titulacoes`, `cursos`, `projetos`,
   `producoes`, `usuarios` + `pesquisadores/:id/completo`, `projetos/:id/equipe[/:pid]`,
