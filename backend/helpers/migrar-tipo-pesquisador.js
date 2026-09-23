@@ -14,6 +14,8 @@
  * Pode ser rodado mais de uma vez: a coluna só é criada se faltar, e o passo 2
  * só promove orientandos a Aluno — nunca rebaixa ninguém a Pesquisador.
  */
+import { QueryTypes } from 'sequelize';
+
 import {
   sequelize,
   CATEGORIA_USUARIO,
@@ -22,8 +24,10 @@ import {
 } from '../models/index.js';
 
 async function criarColuna() {
-  const [colunas] = await sequelize.query("SHOW COLUMNS FROM pesquisador LIKE 'tipo'");
-  if (colunas.length > 0) {
+  // describeTable em vez de SHOW cru: com o conector MariaDB falando com um
+  // MySQL 8, consulta crua de SHOW quebra no Sequelize
+  const colunas = await sequelize.getQueryInterface().describeTable('pesquisador');
+  if (colunas.tipo) {
     console.log('[tipo] coluna pesquisador.tipo já existe');
     return;
   }
@@ -58,8 +62,9 @@ try {
   await criarColuna();
   await marcarAlunos();
 
-  const [final] = await sequelize.query(
-    'SELECT tipo, COUNT(*) AS total FROM pesquisador GROUP BY tipo ORDER BY tipo'
+  const final = await sequelize.query(
+    'SELECT tipo, COUNT(*) AS total FROM pesquisador GROUP BY tipo ORDER BY tipo',
+    { type: QueryTypes.SELECT }
   );
   console.log('\n[tipo] situação final:');
   console.table(final.map((l) => ({ ...l, rotulo: ROTULO_TIPO_PESQUISADOR[l.tipo] ?? '?' })));
