@@ -1,8 +1,9 @@
 /**
  * Endpoints consumidos pelo site público. São somente leitura, sem autenticação,
  * e devolvem apenas os campos que devem ser exibidos a visitantes externos.
+ * A exceção é `candidatar`, que grava a candidatura de um aluno a uma vaga.
  */
-import { Op, fn, col, literal } from 'sequelize';
+import { Op, fn, col, literal, UniqueConstraintError } from 'sequelize';
 
 import asyncHandler from '../helpers/asyncHandler.js';
 import ApiError from '../helpers/ApiError.js';
@@ -14,6 +15,8 @@ import {
   Curso,
   Projeto,
   Producao,
+  Vaga,
+  Candidatura,
   CATEGORIA_USUARIO
 } from '../models/index.js';
 import { STATUS_PROJETO } from '../models/Projeto.js';
@@ -220,4 +223,68 @@ export const estatisticas = asyncHandler(async (req, res) => {
     totalLinhas,
     producaoPorAno
   });
+});
+
+/* ----------------------------- vagas ------------------------------ */
+
+const atributosVaga = ['id', 'titulo', 'descricao', 'quantidade', 'prazo'];
+const projetoDaVaga = {
+  model: Projeto,
+  as: 'projeto',
+  attributes: ['id', 'titulo'],
+  include: [{ model: Pesquisador, as: 'coordenador', attributes: ['id', 'nome'] }]
+};
+
+/** GET /publico/vagas — vagas com prazo em aberto (?projeto filtra), prazo mais próximo primeiro. */
+export const vagas = asyncHandler(async (req, res) => {
+  const { page, limit, offset } = parsePaginacao(req.query, { limitePadrao: 20 });
+  const where = { prazo: { [Op.gte]: new Date() } };
+  if (req.query.projeto) where.projetos_id = req.query.projeto;
+
+  const { rows, count } = await Vaga.findAndCountAll({
+    attributes: atributosVaga,
+    where,
+    include: [projetoDaVaga],
+    order: [['prazo', 'ASC']],
+    limit,
+    offset,
+    distinct: true
+  });
+  res.json(montarResposta({ rows, count, page, limit }));
+});
+
+/**
+ * GET /publico/vagas/:id — detalhe da vaga. Uma vaga encerrada ainda abre
+ * (o link pode ter sido compartilhado), mas volta com `aberta: false`.
+ */
+export const vaga = asyncHandler(async (req, res) => {
+  const registro = await Vaga.findByPk(req.params.id, {
+    attributes: atributosVaga,
+    include: [projetoDaVaga]
+  });
+  if (!registro) throw ApiError.notFound('Vaga não encontrada.');
+  res.json({ ...registro.toJSON(), aberta: registro.aberta() });
+});
+
+/** POST /publico/vagas/:id/candidaturas — candidatura do aluno (nome, matrícula, e-mail acadêmico). */
+export const candidatar = asyncHandler(async (req, res) => {
+  const registro = await Vaga.findByPk(req.params.id, { attributes: ['id', 'prazo'] });
+  if (!registro) throw ApiError.notFound('Vaga não encontrada.');
+  if (!registro.aberta()) throw ApiError.badRequest('O prazo desta vaga já encerrou.');
+
+  const { nome, matricula, email } = req.body;
+  try {
+    const candidatura = await Candidatura.create({ nome, matricula, email, vagas_id: registro.id });
+    // devolve só a confirmação, sem ecoar dados pessoais além do necessário
+    res.status(201).json({
+      id: candidatura.id,
+      criado_em: candidatura.criado_em,
+      mensagem: 'Candidatura recebida.'
+    });
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      throw ApiError.conflict('Já existe uma candidatura a esta vaga com esse e-mail ou matrícula.');
+    }
+    throw error;
+  }
 });

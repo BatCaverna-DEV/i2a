@@ -52,6 +52,12 @@ const env = {
     clientId: required('GOOGLE_CLIENT_ID')
   },
 
+  candidaturas: {
+    // domínio exigido no e-mail acadêmico de quem se candidata a uma vaga.
+    // Aceita subdomínios (acad.ifma.edu.br passa com ifma.edu.br). Vazio = qualquer e-mail.
+    dominioEmail: (process.env.EMAIL_ACADEMICO_DOMINIO ?? 'ifma.edu.br').trim().toLowerCase()
+  },
+
   seed: {
     username: process.env.SEED_ADMIN_USERNAME ?? 'admin',
     nome: process.env.SEED_ADMIN_NOME ?? 'Administrador I2A',

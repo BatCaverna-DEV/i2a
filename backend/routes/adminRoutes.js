@@ -13,6 +13,7 @@ import cursoRoutes from './admin/cursoRoutes.js';
 import projetoRoutes from './admin/projetoRoutes.js';
 import producaoRoutes from './admin/producaoRoutes.js';
 import usuarioRoutes from './admin/usuarioRoutes.js';
+import vagaRoutes from './admin/vagaRoutes.js';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/cursos', cursoRoutes);
 router.use('/projetos', projetoRoutes);
 router.use('/producoes', producaoRoutes);
 router.use('/usuarios', usuarioRoutes);
+router.use('/vagas', vagaRoutes);
 
 export default router;

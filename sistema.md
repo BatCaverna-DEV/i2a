@@ -144,6 +144,12 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 | `orientacacoes` | — | N:N entre `pesquisador` e `projetos` |
 | `producao` | `titulo` VARCHAR(255), `ano`, `veiculo` VARCHAR(255), `resumo` TEXT (+ campos abaixo) | — |
 | `autores` | `ordem` | N:N entre `pesquisador` e `producao` |
+| `vagas` | `titulo`, `descricao` TEXT, `quantidade`, `prazo` | N:1 com `projetos` (cai junto com o projeto) |
+| `candidaturas` | `nome`, `matricula`, `email` (acadêmico), `criado_em` | N:1 com `vagas`; e-mail e matrícula únicos por vaga |
+
+`vagas` e `candidaturas` não estão no DER. A vaga não guarda dono: quem responde por ela é
+o coordenador do projeto (`projetos.pesquisador_id`). Ela aparece no site até o fim do
+`prazo` e depois só no painel, com as candidaturas recebidas.
 
 ### Integridade referencial
 
@@ -302,7 +308,7 @@ Prefixo padrão: `/api`.
 | GET | `/auth/eu` | dados do usuário autenticado |
 | POST | `/auth/desvincular` | solta o vínculo com a conta Google atual |
 
-### `/publico` (sem autenticação, somente leitura)
+### `/publico` (sem autenticação; só leitura, exceto a candidatura)
 
 | Método | Rota | Descrição |
 |---|---|---|
@@ -315,13 +321,17 @@ Prefixo padrão: `/api`.
 | GET | `/publico/cursos` | lista paginada (`?abertos=1`) |
 | GET | `/publico/cursos/:id` | curso com responsável |
 | GET | `/publico/producoes` | lista paginada (`?q`, `?ano`, `?tipo`) |
+| GET | `/publico/vagas` | vagas com prazo em aberto, prazo mais próximo primeiro (`?projeto`) |
+| GET | `/publico/vagas/:id` | vaga com projeto e coordenador; `aberta: false` se o prazo passou |
+| POST | `/publico/vagas/:id/candidaturas` | candidatura (`nome`, `matricula`, `email` acadêmico); 10 por hora por IP, 409 se repetida |
 
 ### `/admin` (exige `Authorization: Bearer`)
 
 CRUD completo (`GET`, `GET /:id`, `POST`, `PUT /:id`, `DELETE /:id`) em:
 
 `/admin/pesquisadores` · `/admin/linhas` · `/admin/titulacoes` · `/admin/cursos` ·
-`/admin/projetos` · `/admin/producoes` · `/admin/usuarios` *(só administradores)*
+`/admin/projetos` · `/admin/producoes` · `/admin/vagas` *(administradores e pesquisadores)* ·
+`/admin/usuarios` *(só administradores)*
 
 Rotas adicionais:
 
@@ -333,6 +343,8 @@ Rotas adicionais:
 | POST | `/admin/producoes/:id/autores` | vincula autor à produção |
 | DELETE | `/admin/producoes/:id/autores/:pesquisadorId` | remove a autoria |
 | POST | `/admin/usuarios/:id/desvincular` | admin solta o vínculo Google do usuário |
+| GET | `/admin/vagas/:id/candidaturas` | candidaturas da vaga, por ordem de chegada |
+| DELETE | `/admin/vagas/:id/candidaturas/:candidaturaId` | remove uma candidatura |
 
 Parâmetros e campos extras:
 
@@ -344,6 +356,8 @@ Parâmetros e campos extras:
   pertencem a uma conta do tipo Orientando são recusados com 400.
 - No formulário de projeto, **Cadastrar orientando** cria o pesquisador com conta do tipo
   Orientando (`POST /admin/pesquisadores`, `categoria: 3`) e já o marca no projeto.
+- Em `/admin/vagas`, o pesquisador só lista, cria e altera vagas dos projetos que coordena;
+  o administrador, de qualquer projeto. A listagem traz `total_candidaturas`.
 
 ### Formatos de resposta
 
@@ -377,6 +391,7 @@ Erros:
 | `/projetos` · `/projetos/:id` | `projetos` · `projeto` | público |
 | `/cursos` · `/cursos/:id` | `cursos` · `curso` | público |
 | `/producoes` | `producoes` | público |
+| `/participe` · `/vagas/:id` | `participe` · `vaga` | público (lista de vagas e formulário de candidatura) |
 | `/admin/login` | `admin-login` | só visitantes |
 | `/admin/dashboard` | `admin-dashboard` | autenticado |
 | `/admin/pesquisadores` | `admin-pesquisadores` | autenticado |
@@ -384,6 +399,7 @@ Erros:
 | `/admin/projetos` | `admin-projetos` | autenticado |
 | `/admin/cursos` | `admin-cursos` | autenticado |
 | `/admin/producoes` | `admin-producoes` | autenticado |
+| `/admin/vagas` | `admin-vagas` | Administrador e Pesquisador |
 | `/admin/usuarios` | `admin-usuarios` | só Administrador |
 | `/admin/perfil` | `admin-perfil` | autenticado |
 
@@ -411,6 +427,7 @@ administrativa só declara os campos da tabela, o formulário e o serviço corre
 | `JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRES_IN` | refresh token |
 | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_NOME` | usuário administrador criado por `npm run db` |
 | `SEED_ADMIN_EMAIL` | **e-mail da conta Google** autorizada no primeiro acesso |
+| `EMAIL_ACADEMICO_DOMINIO` | domínio exigido no e-mail do candidato (padrão `ifma.edu.br`, aceita subdomínios; vazio libera qualquer e-mail) |
 
 ### `frontend/.env`
 

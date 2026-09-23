@@ -1,4 +1,4 @@
-/** Limitadores de requisição para as rotas sensíveis de autenticação. */
+/** Limitadores de requisição para as rotas sensíveis (autenticação e formulários públicos). */
 import rateLimit from 'express-rate-limit';
 
 export const loginLimiter = rateLimit({
@@ -15,4 +15,13 @@ export const totpLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { erro: 'Muitas tentativas de verificação. Aguarde alguns minutos.' }
+});
+
+/** Formulário público de candidatura: barra envio em massa vindo do mesmo IP. */
+export const candidaturaLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erro: 'Muitas candidaturas enviadas. Tente novamente mais tarde.' }
 });

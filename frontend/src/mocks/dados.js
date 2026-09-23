@@ -410,37 +410,65 @@ export const usuarios = [
   }
 ];
 
-/* ---------------------- oportunidades abertas --------------------- */
-/** Ainda não existe no DER — ver as sugestões em sistema.md. */
-export const oportunidades = [
+/* ------------------------------ vagas ----------------------------- */
+/** Vagas abertas nos projetos; o prazo é relativo a hoje. */
+const resumoProjeto = (i) => ({
+  id: projetos[i].id,
+  titulo: projetos[i].titulo,
+  pesquisador_id: projetos[i].pesquisador_id,
+  coordenador: projetos[i].coordenador
+});
+
+export const vagas = [
   {
-    id: 'op-1',
+    id: '88888888-8888-4888-8888-000000000001',
     titulo: 'Bolsa de Iniciação Científica (PIBIC)',
-    nivel: 'Graduação',
-    linha: 'Aprendizagem de Máquina e Aprendizagem Profunda',
-    vagas: 2,
+    descricao:
+      'Apoio à preparação das bases de dados e ao treinamento dos modelos preditivos.\n\n' +
+      'Requisitos: estar matriculado no ADS, ter cursado Estrutura de Dados e noções de Python.\n' +
+      'Carga horária: 20h semanais, com bolsa.',
+    quantidade: 2,
     prazo: dias(25),
-    requisitos: 'Estar matriculado no ADS, ter cursado Estrutura de Dados e noções de Python.',
-    contato: 'bruno.vicente@ifma.edu.br'
+    projetos_id: projetos[0].id,
+    projeto: resumoProjeto(0)
   },
   {
-    id: 'op-2',
-    titulo: 'Iniciação em Desenvolvimento Tecnológico (PIBIT)',
-    nivel: 'Graduação',
-    linha: 'Visão Computacional e Sensoriamento Remoto',
-    vagas: 1,
-    prazo: dias(40),
-    requisitos: 'Interesse em processamento de imagens; desejável experiência com Git.',
-    contato: 'carlos.mendes@ifma.edu.br'
-  },
-  {
-    id: 'op-3',
+    id: '88888888-8888-4888-8888-000000000002',
     titulo: 'Voluntariado em pesquisa',
-    nivel: 'Graduação',
-    linha: 'Processamento de Linguagem Natural',
-    vagas: 3,
-    prazo: null,
-    requisitos: 'Disponibilidade de 8h semanais. Fluxo contínuo, sem prazo de inscrição.',
-    contato: 'daniela.rocha@ifma.edu.br'
+    descricao:
+      'Participação nas reuniões semanais e nos experimentos do projeto.\n' +
+      'Disponibilidade de 8h semanais; desejável experiência com Git.',
+    quantidade: 3,
+    prazo: dias(40),
+    projetos_id: projetos[1].id,
+    projeto: resumoProjeto(1)
+  },
+  {
+    id: '88888888-8888-4888-8888-000000000003',
+    titulo: 'Bolsa PIBIT — edital anterior',
+    descricao: 'Vaga encerrada, mantida para consulta das candidaturas.',
+    quantidade: 1,
+    prazo: dias(-10),
+    projetos_id: projetos[0].id,
+    projeto: resumoProjeto(0)
+  }
+];
+
+export const candidaturas = [
+  {
+    id: '99999999-9999-4999-8999-000000000001',
+    nome: 'Larissa Pereira',
+    matricula: '20241ADS0012',
+    email: 'larissa.pereira@acad.ifma.edu.br',
+    vagas_id: vagas[0].id,
+    criado_em: dias(-2)
+  },
+  {
+    id: '99999999-9999-4999-8999-000000000002',
+    nome: 'Mateus Araújo',
+    matricula: '20231ADS0044',
+    email: 'mateus.araujo@acad.ifma.edu.br',
+    vagas_id: vagas[2].id,
+    criado_em: dias(-15)
   }
 ];

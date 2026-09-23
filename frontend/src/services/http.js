@@ -75,7 +75,11 @@ http.interceptors.response.use(
 
 /** Extrai a mensagem de erro no formato devolvido pela API. */
 export function mensagemDeErro(error, padrao = 'Não foi possível concluir a operação.') {
-  return error?.response?.data?.erro ?? error?.message ?? padrao;
+  const dados = error?.response?.data;
+  // erro de validação: a mensagem do campo diz mais que o "Dados inválidos." genérico
+  const detalhe = dados?.detalhes?.[0]?.mensagem;
+  if (detalhe) return detalhe;
+  return dados?.erro ?? error?.message ?? padrao;
 }
 
 export default http;

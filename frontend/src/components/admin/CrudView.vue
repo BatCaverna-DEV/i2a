@@ -77,7 +77,7 @@
     <!-- formulário de criação/edição -->
     <BModal
       v-model="modalAberto"
-      :title="editando ? `Editar ${entidade}` : `Novo ${entidade}`"
+      :title="editando ? `Editar ${entidade}` : `${feminino ? 'Nova' : 'Novo'} ${entidade}`"
       size="lg"
       ok-title="Salvar"
       cancel-title="Cancelar"
@@ -119,6 +119,8 @@ const props = defineProps({
   titulo: { type: String, required: true },
   subtitulo: { type: String, default: '' },
   entidade: { type: String, required: true },
+  /** concorda os textos com substantivo feminino ("Nova Vaga", "salva") */
+  feminino: { type: Boolean, default: false },
   /** objeto com listar/criar/atualizar/remover (ver services/adminService.js) */
   servico: { type: Object, required: true },
   /** campos do BTable, sem a coluna de ações */
@@ -129,6 +131,8 @@ const props = defineProps({
   filtrosExtras: { type: Object, default: () => ({}) },
   /** transforma o item antes de preencher o formulário de edição */
   paraFormulario: { type: Function, default: (item) => ({ ...item }) },
+  /** transforma o formulário no corpo enviado à API */
+  paraPayload: { type: Function, default: (form) => ({ ...form }) },
   /** força a tela a ficar somente leitura, além da regra do papel */
   somenteLeitura: { type: Boolean, default: false }
 });
@@ -200,12 +204,16 @@ async function salvar() {
   erroForm.value = '';
   try {
     if (editando.value) {
-      await props.servico.atualizar(editando.value.id, { ...form });
+      await props.servico.atualizar(editando.value.id, props.paraPayload({ ...form }));
     } else {
-      await props.servico.criar({ ...form });
+      await props.servico.criar(props.paraPayload({ ...form }));
     }
     modalAberto.value = false;
-    toast.create({ title: 'Pronto', body: `${props.entidade} salvo com sucesso.`, variant: 'success' });
+    toast.create({
+      title: 'Pronto',
+      body: `${props.entidade} ${props.feminino ? 'salva' : 'salvo'} com sucesso.`,
+      variant: 'success'
+    });
     await recarregar();
   } catch (e) {
     erroForm.value = mensagemDeErro(e, 'Não foi possível salvar.');
@@ -220,7 +228,11 @@ async function confirmarRemocao(item) {
 
   try {
     await props.servico.remover(item.id);
-    toast.create({ title: 'Removido', body: `${props.entidade} removido.`, variant: 'success' });
+    toast.create({
+      title: 'Removido',
+      body: `${props.entidade} ${props.feminino ? 'removida' : 'removido'}.`,
+      variant: 'success'
+    });
     await recarregar();
   } catch (e) {
     toast.create({ title: 'Erro', body: mensagemDeErro(e), variant: 'danger' });

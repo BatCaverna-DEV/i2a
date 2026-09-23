@@ -207,8 +207,6 @@ são auto-importados (`unplugin-vue-components`).
   documentação dizer o contrário.
 - `http.js` ainda exclui `/auth/login` e `/auth/verificar` do refresh, rotas do antigo
   login com senha que não existem mais.
-- O front chama `GET /publico/oportunidades` (Participe), **que não existe no backend**;
-  só funciona com mocks.
 - O formulário de Contato valida mas não envia (não há `POST /publico/contato`).
 - E-mails dos pesquisadores aparecem no público (preocupação de LGPD no roadmap).
 - Pesquisador cria orientandos mas não pode editá-los depois (a posse é conferida contra
@@ -218,7 +216,8 @@ são auto-importados (`unplugin-vue-components`).
 
 1. Rodar com `VITE_USE_MOCKS=false` e conferir tela por tela.
 2. Notícias (tabela `noticias` + listagem + bloco na home).
-3. Oportunidades como tabela + contato funcionando (honeypot + rate limit).
+3. Contato funcionando (honeypot + rate limit). As vagas já são tabela (`vagas` +
+   `candidaturas`, página Participe).
 4. Página por linha de pesquisa (`resumo`, `slug`, `GET /publico/linhas/:slug`).
 5. BibTeX e importação do Lattes.
 6. Inscrição on-line em cursos.

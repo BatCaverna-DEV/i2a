@@ -45,6 +45,13 @@ const real = {
       http.delete(`/admin/producoes/${id}/autores/${pesquisadorId}`).then((r) => r.data)
   },
 
+  vagas: {
+    ...recurso('vagas'),
+    candidaturas: (id) => http.get(`/admin/vagas/${id}/candidaturas`).then((r) => r.data),
+    removerCandidatura: (id, candidaturaId) =>
+      http.delete(`/admin/vagas/${id}/candidaturas/${candidaturaId}`).then((r) => r.data)
+  },
+
   usuarios: {
     ...recurso('usuarios'),
     desvincular: (id) => http.post(`/admin/usuarios/${id}/desvincular`).then((r) => r.data)
@@ -53,4 +60,5 @@ const real = {
 
 const api = USANDO_MOCKS ? demo : real;
 
-export const { linhas, titulacoes, cursos, pesquisadores, projetos, producoes, usuarios } = api;
+export const { linhas, titulacoes, cursos, pesquisadores, projetos, producoes, vagas, usuarios } =
+  api;

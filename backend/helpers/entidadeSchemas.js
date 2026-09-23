@@ -1,6 +1,8 @@
 /** Schemas Zod das entidades administrativas. */
 import { z } from 'zod';
 
+import env from '../config/env.js';
+
 const opcional = (schema) => schema.optional().nullable();
 
 /* -------------------------- linhas -------------------------- */
@@ -86,6 +88,38 @@ export const projetoSchema = z.object({
 });
 
 export const projetoUpdateSchema = projetoSchema.partial();
+
+/* -------------------------- vagas --------------------------- */
+export const vagaSchema = z.object({
+  titulo: z.string().trim().min(3, 'O título deve ter ao menos 3 caracteres.').max(255),
+  // descrição é texto longo: o limite existe só para barrar abuso
+  descricao: opcional(z.string().max(20000, 'A descrição passou de 20.000 caracteres.')),
+  quantidade: z.coerce.number().int().min(1, 'A quantidade de vagas deve ser ao menos 1.').max(999).default(1),
+  prazo: z.coerce.date({ errorMap: () => ({ message: 'Prazo inválido.' }) }),
+  projetos_id: z.string().uuid('Selecione o projeto da vaga.')
+});
+
+export const vagaUpdateSchema = vagaSchema.partial();
+
+/* ----------------------- candidaturas ----------------------- */
+// Pública: vem do formulário do site, sem login.
+const dominio = env.candidaturas.dominioEmail;
+const emailAcademico = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email('E-mail inválido.')
+  .max(150)
+  .refine(
+    (email) => !dominio || email.endsWith(`@${dominio}`) || email.endsWith(`.${dominio}`),
+    `Use o seu e-mail acadêmico (@${dominio}).`
+  );
+
+export const candidaturaSchema = z.object({
+  nome: z.string().trim().min(3, 'Informe o nome completo.').max(100),
+  matricula: z.string().trim().min(3, 'Matrícula inválida.').max(20, 'Matrícula inválida.'),
+  email: emailAcademico
+});
 
 /* ------------------------- producao ------------------------- */
 export const producaoSchema = z.object({

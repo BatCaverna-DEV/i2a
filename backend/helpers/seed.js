@@ -10,6 +10,7 @@
  *   npm run db -- --alter         ajusta colunas de tabelas que já existem
  *   npm run db -- --force         APAGA e recria tudo (só em desenvolvimento)
  *   npm run db -- --tabelas       só cria as tabelas, sem popular
+ *                                 (use para criar vagas/candidaturas num banco existente)
  *
  * O script é idempotente: rodar duas vezes sem --force não duplica nada.
  */
@@ -46,7 +47,9 @@ const ORDEM_DAS_TABELAS = [
   'Projeto',
   'Orientacao',
   'Producao',
-  'Autor'
+  'Autor',
+  'Vaga',
+  'Candidatura'
 ];
 
 async function criarTabelas() {

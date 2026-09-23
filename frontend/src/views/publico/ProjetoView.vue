@@ -48,6 +48,18 @@
                 </li>
               </ul>
             </div>
+
+            <div v-if="vagasAbertas.length" class="i2a-card p-4 mt-4">
+              <p class="i2a-eyebrow mb-3">Vagas abertas</p>
+              <ul class="list-unstyled d-grid gap-3 mb-0 small">
+                <li v-for="v in vagasAbertas" :key="v.id">
+                  <RouterLink :to="{ name: 'vaga', params: { id: v.id } }" class="fw-semibold text-decoration-none">
+                    {{ v.titulo }}
+                  </RouterLink>
+                  <span class="d-block i2a-meta">Inscrições até {{ formatarData(v.prazo) }}</span>
+                </li>
+              </ul>
+            </div>
           </BCol>
         </BRow>
       </BContainer>
@@ -66,13 +78,14 @@ import { BContainer, BRow, BCol } from 'bootstrap-vue-next';
 import CabecalhoPagina from '@/components/comum/CabecalhoPagina.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
-import { projeto } from '@/services/publicoService';
-import { STATUS_PROJETO, TIPO_PROJETO, iniciais } from '@/utils/formatadores';
+import { projeto, vagas } from '@/services/publicoService';
+import { STATUS_PROJETO, TIPO_PROJETO, iniciais, formatarData } from '@/utils/formatadores';
 
 const props = defineProps({ id: { type: String, required: true } });
 
 const dados = ref(null);
 const carregando = ref(true);
+const vagasAbertas = ref([]);
 
 /** Linha acima do título: tipo · situação · ano de início. */
 const cabecalho = computed(() => {
@@ -85,6 +98,10 @@ const cabecalho = computed(() => {
 onMounted(async () => {
   try {
     dados.value = await projeto(props.id);
+    // vagas são um extra: se falharem, a página do projeto continua
+    vagas({ projeto: props.id })
+      .then((r) => (vagasAbertas.value = r.data))
+      .catch(() => {});
   } catch {
     dados.value = null;
   } finally {

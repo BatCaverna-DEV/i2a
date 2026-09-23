@@ -25,9 +25,11 @@ const real = {
 
   producoes: (params) => http.get('/publico/producoes', { params }).then((r) => r.data),
 
-  // AINDA NÃO EXISTE NO BACKEND — ver as sugestões no fim de sistema.md.
-  // Quando a rota for criada, basta trocar esta linha.
-  oportunidades: () => http.get('/publico/oportunidades').then((r) => r.data)
+  // vagas com prazo em aberto e candidatura do aluno
+  vagas: (params) => http.get('/publico/vagas', { params }).then((r) => r.data),
+  vaga: (id) => http.get(`/publico/vagas/${id}`).then((r) => r.data),
+  candidatar: (id, payload) =>
+    http.post(`/publico/vagas/${id}/candidaturas`, payload).then((r) => r.data)
 };
 
 const api = USANDO_MOCKS ? demo : real;
@@ -41,4 +43,6 @@ export const projeto = (...a) => api.projeto(...a);
 export const cursos = (...a) => api.cursos(...a);
 export const curso = (...a) => api.curso(...a);
 export const producoes = (...a) => api.producoes(...a);
-export const oportunidades = (...a) => api.oportunidades(...a);
+export const vagas = (...a) => api.vagas(...a);
+export const vaga = (...a) => api.vaga(...a);
+export const candidatar = (...a) => api.candidatar(...a);

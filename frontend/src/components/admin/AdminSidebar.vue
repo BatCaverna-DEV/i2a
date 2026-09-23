@@ -42,6 +42,7 @@ const conteudo = [
   { rota: 'admin-pesquisadores', rotulo: 'Pesquisadores', icone: 'bi-people', categorias: GESTORES },
   { rota: 'admin-producoes', rotulo: 'Publicações', icone: 'bi-journal-text', categorias: GESTORES },
   { rota: 'admin-cursos', rotulo: 'Cursos', icone: 'bi-mortarboard', categorias: GESTORES },
+  { rota: 'admin-vagas', rotulo: 'Vagas', icone: 'bi-person-plus', categorias: GESTORES },
   {
     rota: 'admin-linhas',
     rotulo: 'Linhas de pesquisa',

@@ -85,6 +85,17 @@ export function paraInputDateTime(valor) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** Data ISO → valor de <input type="date"> (no fuso local). */
+export function paraInputDate(valor) {
+  return paraInputDateTime(valor).slice(0, 10);
+}
+
+/** <input type="date"> → ISO do último minuto daquele dia (no fuso local). */
+export function fimDoDia(data) {
+  if (!data) return null;
+  return new Date(`${data}T23:59:59`).toISOString();
+}
+
 export function inscricoesAbertas(curso) {
   if (!curso?.inscricoes_inicio || !curso?.inscricoes_fim) return false;
   const agora = Date.now();
@@ -101,4 +112,10 @@ export function iniciais(nome) {
   const primeira = partes[0][0];
   const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
   return (primeira + ultima).toUpperCase();
+}
+
+/** A vaga ainda aceita candidaturas? (mesma regra da API: até o fim do prazo) */
+export function vagaAberta(vaga) {
+  if (!vaga?.prazo) return false;
+  return Date.now() <= new Date(vaga.prazo).getTime();
 }

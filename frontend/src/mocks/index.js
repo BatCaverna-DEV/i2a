@@ -45,6 +45,11 @@ const repo = {
     filtros: ['pesquisador_id', 'ano'],
     ordenar: (a, b) => (b.ano ?? 0) - (a.ano ?? 0)
   }),
+  vagas: criarRepositorio(dados.vagas, {
+    camposBusca: ['titulo', 'descricao'],
+    filtros: ['projetos_id'],
+    ordenar: (a, b) => new Date(b.prazo) - new Date(a.prazo)
+  }),
   usuarios: criarRepositorio(dados.usuarios, {
     camposBusca: ['username', 'email'],
     ordenar: (a, b) => a.username.localeCompare(b.username)
@@ -74,6 +79,22 @@ function ehAdministrador(pesquisadorId) {
   return dados.usuarios.some((u) => u.pesquisador_id === pesquisadorId && u.categoria === 1);
 }
 const pesquisadoresContados = () => dados.pesquisadores.filter((p) => !ehAdministrador(p.id));
+
+/** Candidaturas em memória, como a tabela `candidaturas` da API. */
+const candidaturas = dados.candidaturas.map((c) => ({ ...c }));
+const vagaAberta = (vaga) => new Date(vaga.prazo).getTime() >= Date.now();
+
+/** Erro no formato do axios, para que `mensagemDeErro` funcione igual. */
+function erroApi(status, erro) {
+  return Object.assign(new Error(erro), { response: { status, data: { erro } } });
+}
+
+/** Resumo público da vaga: sem o id do coordenador. */
+function vagaPublica(v) {
+  const { projetos_id, total_candidaturas, ...resto } = v;
+  const { pesquisador_id, ...projeto } = v.projeto ?? {};
+  return { ...resto, projeto };
+}
 
 function inscricoesAbertas(curso) {
   if (!curso.inscricoes_inicio || !curso.inscricoes_fim) return false;
@@ -179,9 +200,51 @@ export const publico = {
     return paginar(lista, { page: params.page, limit: params.limit ?? 20 });
   },
 
-  async oportunidades() {
+  async vagas(params = {}) {
     await atraso();
-    return { data: [...dados.oportunidades] };
+    const lista = repo.vagas
+      .todos()
+      .filter(vagaAberta)
+      .filter((v) => !params.projeto || v.projetos_id === params.projeto)
+      .sort((a, b) => new Date(a.prazo) - new Date(b.prazo))
+      .map(vagaPublica);
+    return paginar(lista, { page: params.page, limit: params.limit ?? 20 });
+  },
+
+  async vaga(id) {
+    await atraso();
+    const v = repo.vagas.todos().find((x) => x.id === id);
+    if (!v) throw erroApi(404, 'Vaga não encontrada.');
+    return { ...vagaPublica(v), aberta: vagaAberta(v) };
+  },
+
+  async candidatar(id, payload) {
+    await atraso(400);
+    const v = repo.vagas.todos().find((x) => x.id === id);
+    if (!v) throw erroApi(404, 'Vaga não encontrada.');
+    if (!vagaAberta(v)) throw erroApi(400, 'O prazo desta vaga já encerrou.');
+
+    const email = String(payload.email ?? '').trim().toLowerCase();
+    if (!/@([\w-]+\.)*ifma\.edu\.br$/.test(email)) {
+      throw erroApi(400, 'Use o seu e-mail acadêmico (@ifma.edu.br).');
+    }
+    const repetida = candidaturas.some(
+      (c) => c.vagas_id === id && (c.email === email || c.matricula === payload.matricula.trim())
+    );
+    if (repetida) {
+      throw erroApi(409, 'Já existe uma candidatura a esta vaga com esse e-mail ou matrícula.');
+    }
+
+    const nova = {
+      id: crypto.randomUUID?.() ?? `c-${Date.now()}`,
+      nome: payload.nome.trim(),
+      matricula: payload.matricula.trim(),
+      email,
+      vagas_id: id,
+      criado_em: new Date().toISOString()
+    };
+    candidaturas.push(nova);
+    return { id: nova.id, criado_em: nova.criado_em, mensagem: 'Candidatura recebida.' };
   }
 };
 
@@ -299,6 +362,64 @@ export const admin = {
       return repo.producoes.atualizar(id, {
         autores: producao.autores.filter((a) => a.id !== pesquisadorId)
       });
+    }
+  },
+
+  vagas: {
+    ...repo.vagas,
+
+    /** Espelha a API: devolve o total de candidaturas de cada vaga. */
+    async listar(params = {}) {
+      const resposta = await repo.vagas.listar(params);
+      return {
+        ...resposta,
+        data: resposta.data.map((v) => ({
+          ...v,
+          total_candidaturas: candidaturas.filter((c) => c.vagas_id === v.id).length
+        }))
+      };
+    },
+
+    async criar(payload) {
+      const projeto = dados.projetos.find((pr) => pr.id === payload.projetos_id);
+      return repo.vagas.criar({
+        ...payload,
+        projeto: projeto && {
+          id: projeto.id,
+          titulo: projeto.titulo,
+          pesquisador_id: projeto.pesquisador_id,
+          coordenador: projeto.coordenador
+        }
+      });
+    },
+
+    async atualizar(id, payload) {
+      const projeto = dados.projetos.find((pr) => pr.id === payload.projetos_id);
+      return repo.vagas.atualizar(id, {
+        ...payload,
+        ...(projeto && {
+          projeto: {
+            id: projeto.id,
+            titulo: projeto.titulo,
+            pesquisador_id: projeto.pesquisador_id,
+            coordenador: projeto.coordenador
+          }
+        })
+      });
+    },
+
+    async candidaturas(id) {
+      await atraso();
+      const lista = candidaturas
+        .filter((c) => c.vagas_id === id)
+        .sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em));
+      return { data: lista };
+    },
+
+    async removerCandidatura(id, candidaturaId) {
+      await atraso();
+      const i = candidaturas.findIndex((c) => c.id === candidaturaId && c.vagas_id === id);
+      if (i >= 0) candidaturas.splice(i, 1);
     }
   },
 

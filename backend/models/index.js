@@ -19,6 +19,8 @@ import Projeto from './Projeto.js';
 import Orientacao from './Orientacao.js';
 import Producao from './Producao.js';
 import Autor from './Autor.js';
+import Vaga from './Vaga.js';
+import Candidatura from './Candidatura.js';
 
 /* ----------------------------------------------------------------
  * linhas 1 --- N pesquisador
@@ -122,6 +124,29 @@ Producao.belongsToMany(Pesquisador, {
 Autor.belongsTo(Pesquisador, { foreignKey: 'pesquisador_id', as: 'pesquisador' });
 Autor.belongsTo(Producao, { foreignKey: 'producao_id', as: 'producao' });
 
+/* ----------------------------------------------------------------
+ * projetos 1 --- N vagas
+ * A vaga não existe sem o projeto: cai junto.
+ * ---------------------------------------------------------------- */
+Projeto.hasMany(Vaga, {
+  foreignKey: { name: 'projetos_id', allowNull: false },
+  as: 'vagas',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+Vaga.belongsTo(Projeto, { foreignKey: 'projetos_id', as: 'projeto' });
+
+/* ----------------------------------------------------------------
+ * vagas 1 --- N candidaturas
+ * ---------------------------------------------------------------- */
+Vaga.hasMany(Candidatura, {
+  foreignKey: { name: 'vagas_id', allowNull: false },
+  as: 'candidaturas',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+Candidatura.belongsTo(Vaga, { foreignKey: 'vagas_id', as: 'vaga' });
+
 export {
   sequelize,
   Usuario,
@@ -132,7 +157,9 @@ export {
   Projeto,
   Orientacao,
   Producao,
-  Autor
+  Autor,
+  Vaga,
+  Candidatura
 };
 
 export { CATEGORIA_USUARIO, ROTULO_CATEGORIA, STATUS_USUARIO } from './Usuario.js';
@@ -150,5 +177,7 @@ export default {
   Projeto,
   Orientacao,
   Producao,
-  Autor
+  Autor,
+  Vaga,
+  Candidatura
 };

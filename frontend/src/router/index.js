@@ -57,6 +57,12 @@ const routes = [
         component: () => import('@/views/publico/ParticipeView.vue')
       },
       {
+        path: 'vagas/:id',
+        name: 'vaga',
+        component: () => import('@/views/publico/VagaView.vue'),
+        props: true
+      },
+      {
         path: 'contato',
         name: 'contato',
         component: () => import('@/views/publico/ContatoView.vue')
@@ -108,6 +114,12 @@ const routes = [
         path: 'producoes',
         name: 'admin-producoes',
         component: () => import('@/views/admin/ProducoesAdmin.vue')
+      },
+      {
+        path: 'vagas',
+        name: 'admin-vagas',
+        component: () => import('@/views/admin/VagasAdmin.vue'),
+        meta: { categorias: [CATEGORIA.ADMINISTRADOR, CATEGORIA.PESQUISADOR] }
       },
       {
         path: 'usuarios',
