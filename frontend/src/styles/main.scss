@@ -2,9 +2,11 @@
 // Estilização padrão do sistema — Bootstrap 5 compilado a partir do
 // SCSS, com o tema do Grupo I2A definido ANTES da importação.
 //
-// Direção visual: azul acadêmico. Base clara, mas com profundidade —
-// uma faixa escura de abertura, superfícies em azul muito diluído,
-// cartões com borda que ganha cor no hover e detalhes em gradiente.
+// Direção visual: azul acadêmico com acento ciano.
+//   - fundo da página em cinza-azulado claro, nunca branco chapado;
+//   - conteúdo em cartões brancos com sombra suave, que se destacam do fundo;
+//   - navbar, rodapé e cabeçalhos de página em azul-noite;
+//   - ciano como segunda cor, para destaques, ícones e gradientes.
 //
 // Ordem obrigatória:
 //   1. funções do Sass   2. variáveis do tema
@@ -13,37 +15,61 @@
 @use 'sass:color';
 
 // -------------------------- 1. tema ---------------------------
-$azul-900: #0b1f3a; // fundo escuro da abertura
+$azul-950: #06152b; // rodapé, fundo mais profundo
+$azul-900: #0b2447; // navbar, cabeçalhos, sidebar
 $azul-800: #12305a;
 $azul-700: #17457f;
 $azul-600: #1d5bb0;
 $azul-500: #2563eb; // ação principal
 $azul-300: #7aa7f0;
-$azul-100: #e8f0fe; // superfícies diluídas
-$azul-050: #f5f8ff;
+$azul-100: #e3ecfb; // superfícies diluídas
+$azul-050: #f3f7fd;
+
+$ciano-600: #0891b2; // acento sobre fundo claro
+$ciano-400: #22d3ee; // acento sobre fundo escuro
+$ciano-100: #cffafe;
+
+$fundo: #eef2f8; // fundo das páginas
 
 $primary: $azul-600;
 $secondary: #5b6b80;
-$info: $azul-500;
+$info: $ciano-600;
 
-$body-bg: #ffffff;
+$body-bg: $fundo;
 $body-color: #14212e;
-$body-secondary-color: #5b6b80;
+$body-secondary-color: #56667b;
 
-$border-color: #dbe3ee;
+$border-color: #dde5f0;
 $border-radius: 0.5rem;
 $border-radius-sm: 0.375rem;
-$border-radius-lg: 0.75rem;
+$border-radius-lg: 0.875rem;
 
 $font-family-sans-serif: 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 $line-height-base: 1.6;
-$headings-font-weight: 680;
+$headings-font-weight: 700;
 $headings-line-height: 1.22;
 
 $card-border-color: $border-color;
 $card-cap-bg: transparent;
 $link-color: $azul-600;
 $link-hover-color: $azul-800;
+
+// O Bootstrap 5.3 usa o fundo da página (var(--bs-body-bg)) em vários
+// componentes. Como o fundo aqui é cinza-azulado, eles precisam ser
+// declarados brancos — senão tabelas e modais ficam cinzas dentro dos cartões.
+$input-bg: #fff;
+$form-select-bg: #fff;
+$table-bg: transparent;
+$card-bg: #fff;
+$modal-content-bg: #fff;
+$dropdown-bg: #fff;
+$pagination-bg: #fff;
+$list-group-bg: #fff;
+$popover-bg: #fff;
+$offcanvas-bg-color: #fff;
+$toast-background-color: rgba(255, 255, 255, 0.96);
+$modal-content-border-radius: $border-radius-lg;
+$dropdown-border-radius: $border-radius;
 
 $navbar-padding-y: 0.85rem;
 $enable-shadows: false;
@@ -55,6 +81,7 @@ $enable-shadows: false;
 
 // Tokens reaproveitados nos componentes
 :root {
+  --i2a-azul-950: #{$azul-950};
   --i2a-azul-900: #{$azul-900};
   --i2a-azul-700: #{$azul-700};
   --i2a-azul-600: #{$azul-600};
@@ -62,10 +89,21 @@ $enable-shadows: false;
   --i2a-azul-300: #{$azul-300};
   --i2a-azul-100: #{$azul-100};
   --i2a-azul-050: #{$azul-050};
+  --i2a-ciano-600: #{$ciano-600};
+  --i2a-ciano-400: #{$ciano-400};
+  --i2a-fundo: #{$fundo};
+
+  // sombra padrão dos cartões: um fio curto + uma sombra longa e difusa
+  --i2a-sombra: 0 1px 2px rgba(11, 36, 71, 0.06), 0 10px 28px -14px rgba(11, 36, 71, 0.22);
+  --i2a-sombra-hover: 0 2px 4px rgba(11, 36, 71, 0.06), 0 18px 38px -16px rgba(11, 36, 71, 0.32);
 }
 
 h1, h2, h3, .h1, .h2, .h3 {
   letter-spacing: -0.022em;
+}
+
+::selection {
+  background: rgba($ciano-400, 0.35);
 }
 
 .i2a-meta {
@@ -82,15 +120,42 @@ h1, h2, h3, .h1, .h2, .h3 {
   color: $azul-600;
 }
 
-// ---------------------- abertura escura -----------------------
-// Faixa azul-noite com um brilho diagonal discreto e uma malha de pontos.
-// É o que tira o site do "branco chapado" sem virar poluição visual.
-.i2a-hero {
+// Variante com um traço em gradiente antes do texto (títulos de seção)
+.i2a-eyebrow--traco {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
+    content: '';
+    width: 1.5rem;
+    height: 3px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, $azul-500, $ciano-400);
+  }
+}
+
+// Gradiente de marca, reaproveitado em textos e faixas
+%gradiente-marca {
+  background: linear-gradient(120deg, $azul-500 0%, $ciano-400 100%);
+}
+
+.i2a-texto-gradiente {
+  background: linear-gradient(120deg, $azul-300, $ciano-400);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// ------------------- fundos escuros (base) --------------------
+// Azul-noite com brilhos radiais e malha de pontos. Usado na abertura da
+// home, nos cabeçalhos de página, na seção escura e na tela de login.
+%fundo-noite {
   position: relative;
   background:
-    radial-gradient(1100px 520px at 12% -10%, rgba(37, 99, 235, 0.42), transparent 62%),
-    radial-gradient(760px 420px at 88% 8%, rgba(23, 69, 127, 0.55), transparent 60%),
-    linear-gradient(160deg, $azul-900 0%, #0a1a31 100%);
+    radial-gradient(900px 480px at 10% -20%, rgba($azul-500, 0.45), transparent 62%),
+    radial-gradient(700px 420px at 92% 0%, rgba($ciano-400, 0.2), transparent 60%),
+    linear-gradient(160deg, $azul-900 0%, $azul-950 100%);
   color: #fff;
   overflow: hidden;
 
@@ -99,9 +164,9 @@ h1, h2, h3, .h1, .h2, .h3 {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 22px 22px;
-    mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
     pointer-events: none;
   }
 
@@ -110,36 +175,122 @@ h1, h2, h3, .h1, .h2, .h3 {
   }
 
   .i2a-eyebrow {
-    color: $azul-300;
+    color: $ciano-400;
   }
 
-  .text-body-secondary {
+  .text-body-secondary,
+  .i2a-meta {
     color: rgba(255, 255, 255, 0.72) !important;
   }
+
+  a:not(.btn) {
+    color: #fff;
+  }
+
+  // cartão branco sobre o fundo escuro (ex.: login) volta às cores normais
+  .i2a-painel {
+    color: $body-color;
+
+    .i2a-meta,
+    .text-body-secondary {
+      color: $body-secondary-color !important;
+    }
+
+    a:not(.btn) {
+      color: $link-color;
+    }
+  }
+}
+
+// ---------------------- abertura da home ----------------------
+.i2a-hero {
+  @extend %fundo-noite;
 }
 
 // Cartão de número dentro da abertura escura
 .i2a-hero-stat {
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: $border-radius-lg;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(2px);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(4px);
+
+  .bi {
+    color: $ciano-400;
+  }
+}
+
+// ------------------- cabeçalho das páginas --------------------
+// Faixa escura que abre todas as páginas internas do site público.
+.i2a-cabecalho {
+  @extend %fundo-noite;
+  padding: 3rem 0 3.25rem;
+
+  // linha fina em gradiente na base da faixa
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    @extend %gradiente-marca;
+  }
+
+  .i2a-cabecalho-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+// Seção inteira em azul-noite, para alternar com as seções claras
+.i2a-secao-escura {
+  @extend %fundo-noite;
+
+  .i2a-card {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+    color: #fff;
+  }
+
+  .text-body-secondary {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
 }
 
 // ------------------------ superfícies -------------------------
+// Bloco de apoio (colunas laterais): branco com leve azul no topo
 .i2a-surface {
-  background-color: $azul-050;
+  background: linear-gradient(180deg, #fff 0%, $azul-050 100%);
   border: 1px solid $border-color;
   border-radius: $border-radius-lg;
+  box-shadow: var(--i2a-sombra);
 }
 
-// Cartão: borda que ganha azul e um fio superior no hover
+// Bloco de conteúdo estático (texto, formulários)
+.i2a-painel {
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  box-shadow: var(--i2a-sombra);
+}
+
+// Cartão clicável: sobe um pouco e ganha um fio em gradiente no hover
 .i2a-card {
   position: relative;
   border: 1px solid $border-color;
   border-radius: $border-radius-lg;
   background: #fff;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  box-shadow: var(--i2a-sombra);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 
   &::after {
     content: '';
@@ -147,15 +298,15 @@ h1, h2, h3, .h1, .h2, .h3 {
     inset: -1px -1px auto -1px;
     height: 3px;
     border-radius: $border-radius-lg $border-radius-lg 0 0;
-    background: linear-gradient(90deg, $azul-500, $azul-300);
+    @extend %gradiente-marca;
     opacity: 0;
-    transition: opacity 0.16s ease;
+    transition: opacity 0.18s ease;
   }
 
   &:hover {
-    border-color: $azul-300;
-    box-shadow: 0 6px 20px rgba(11, 31, 58, 0.07);
-    transform: translateY(-2px);
+    border-color: rgba($azul-500, 0.35);
+    box-shadow: var(--i2a-sombra-hover);
+    transform: translateY(-3px);
 
     &::after {
       opacity: 1;
@@ -163,13 +314,98 @@ h1, h2, h3, .h1, .h2, .h3 {
   }
 }
 
-// Variante sem o fio superior, para blocos que não são clicáveis
+// Variante para blocos que não são clicáveis
 .i2a-card--estatico:hover {
   transform: none;
-  box-shadow: none;
+  border-color: $border-color;
+  box-shadow: var(--i2a-sombra);
 
   &::after {
     opacity: 0;
+  }
+}
+
+// Chamada em gradiente azul → ciano
+.i2a-cta {
+  position: relative;
+  overflow: hidden;
+  border-radius: $border-radius-lg;
+  background:
+    radial-gradient(520px 260px at 100% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(120deg, $azul-600 0%, $azul-500 45%, $ciano-600 100%);
+  color: #fff;
+  box-shadow: 0 18px 40px -18px rgba($azul-500, 0.6);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+    background-size: 18px 18px;
+    mask-image: linear-gradient(to left, #000, transparent 70%);
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+  }
+
+  .i2a-eyebrow {
+    color: $ciano-100;
+  }
+
+  .text-body-secondary {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+}
+
+// Ícone em quadrado arredondado colorido
+.i2a-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  color: $azul-600;
+  background: $azul-100;
+
+  &--ciano   { color: $ciano-600; background: $ciano-100; }
+  &--violeta { color: #6d28d9; background: #ede9fe; }
+  &--ambar   { color: #b45309; background: #fef3c7; }
+  &--verde   { color: #047857; background: #d1fae5; }
+  &--rosa    { color: #be185d; background: #fce7f3; }
+
+  // versão sobre fundo escuro
+  &--vidro {
+    color: $ciano-400;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+}
+
+// Avatar com as iniciais do nome
+.i2a-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: #fff;
+  @extend %gradiente-marca;
+
+  &--grande {
+    width: 5rem;
+    height: 5rem;
+    font-size: 1.6rem;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -180,31 +416,69 @@ h1, h2, h3, .h1, .h2, .h3 {
   opacity: 1;
 }
 
+// Logotipo em texto: selo com a sigla
+.i2a-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.55rem;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: #fff;
+  @extend %gradiente-marca;
+  box-shadow: 0 6px 16px -6px rgba($ciano-400, 0.6);
+}
+
+// Botão de destaque em ciano, para usar sobre fundo escuro
+.btn-ciano {
+  --bs-btn-color: #{$azul-950};
+  --bs-btn-bg: #{$ciano-400};
+  --bs-btn-border-color: #{$ciano-400};
+  --bs-btn-hover-color: #{$azul-950};
+  --bs-btn-hover-bg: #{color.adjust($ciano-400, $lightness: 8%)};
+  --bs-btn-hover-border-color: #{color.adjust($ciano-400, $lightness: 8%)};
+  --bs-btn-active-color: #{$azul-950};
+  --bs-btn-active-bg: #{color.adjust($ciano-400, $lightness: -6%)};
+  --bs-btn-active-border-color: #{color.adjust($ciano-400, $lightness: -6%)};
+  font-weight: 600;
+}
+
 // -------------------------- navbar ----------------------------
 .i2a-navbar {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: saturate(180%) blur(10px);
-  border-bottom: 1px solid $border-color;
+  background: rgba($azul-950, 0.94);
+  backdrop-filter: saturate(160%) blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
 
-  .navbar-brand .i2a-marca {
-    background: linear-gradient(120deg, $azul-700, $azul-500);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .navbar-brand {
+    color: #fff;
+  }
+
+  .i2a-navbar-sub {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .navbar-toggler {
+    color: #fff;
   }
 
   .nav-link {
-    color: $body-color;
+    color: rgba(255, 255, 255, 0.78);
     font-size: 0.9375rem;
     position: relative;
 
-    &:hover {
-      color: $azul-600;
+    &:hover,
+    &:focus {
+      color: #fff;
     }
 
-    // sublinhado fino só na rota ativa
+    // sublinhado em gradiente só na rota ativa
     &.router-link-active {
-      color: $azul-600;
+      color: #fff;
       font-weight: 600;
 
       &::after {
@@ -212,46 +486,124 @@ h1, h2, h3, .h1, .h2, .h3 {
         position: absolute;
         left: 1rem;
         right: 1rem;
-        bottom: -0.35rem;
+        bottom: -0.2rem;
         height: 2px;
         border-radius: 2px;
-        background: linear-gradient(90deg, $azul-500, $azul-300);
+        background: linear-gradient(90deg, $azul-300, $ciano-400);
       }
     }
+  }
+
+  // menu aberto no celular
+  @include media-breakpoint-down(lg) {
+    .navbar-collapse {
+      padding: 0.5rem 0 1rem;
+    }
+
+    .nav-link.router-link-active::after {
+      left: 0;
+      right: auto;
+      width: 1.5rem;
+    }
+  }
+}
+
+// -------------------------- rodapé ----------------------------
+.i2a-rodape {
+  position: relative;
+  background: $azul-950;
+  color: rgba(255, 255, 255, 0.72);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    @extend %gradiente-marca;
+  }
+
+  .i2a-eyebrow {
+    color: $ciano-400;
+  }
+
+  .i2a-meta {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+
+    &:hover {
+      color: $ciano-400;
+    }
+  }
+
+  .i2a-rule {
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 
 // ------------------------- painel -----------------------------
 .i2a-sidebar {
   min-height: calc(100vh - 57px);
-  background-color: $azul-050;
-  border-right: 1px solid $border-color;
+  background: linear-gradient(180deg, $azul-900 0%, $azul-950 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+  .i2a-eyebrow {
+    color: rgba($ciano-400, 0.75);
+  }
 
   .nav-link {
-    color: $body-color;
+    color: rgba(255, 255, 255, 0.72);
     font-size: 0.9375rem;
     border-radius: $border-radius;
 
+    .bi {
+      opacity: 0.85;
+    }
+
     &:hover {
-      background-color: $azul-100;
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.06);
     }
 
     &.router-link-active {
-      background: linear-gradient(90deg, rgba($azul-500, 0.14), rgba($azul-500, 0.04));
-      color: $azul-700;
+      background: linear-gradient(90deg, rgba($ciano-400, 0.2), rgba($ciano-400, 0.04));
+      color: #fff;
       font-weight: 600;
-      box-shadow: inset 2px 0 0 $azul-500;
+      box-shadow: inset 3px 0 0 $ciano-400;
+
+      .bi {
+        color: $ciano-400;
+        opacity: 1;
+      }
     }
   }
+}
+
+// Conteúdo do painel: tabela de cadastro dentro de um cartão branco
+.i2a-admin-main {
+  background:
+    radial-gradient(800px 300px at 100% 0%, rgba($azul-500, 0.06), transparent 70%),
+    $fundo;
+}
+
+// Tela de login
+.i2a-login-fundo {
+  @extend %fundo-noite;
+  min-height: 100vh;
 }
 
 // --------------------------- outros ---------------------------
 .i2a-stat {
   font-size: 2.25rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
-  background: linear-gradient(120deg, $azul-700, $azul-500);
+  background: linear-gradient(120deg, $azul-700, $azul-500 55%, $ciano-600);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -266,12 +618,24 @@ h1, h2, h3, .h1, .h2, .h3 {
 .i2a-selo {
   display: inline-block;
   font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.2rem 0.6rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
   background: $azul-100;
   color: $azul-700;
   border: 1px solid rgba($azul-500, 0.18);
+
+  &--ciano {
+    background: $ciano-100;
+    color: color.adjust($ciano-600, $lightness: -8%);
+    border-color: rgba($ciano-600, 0.25);
+  }
+
+  &--vidro {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.18);
+  }
 }
 
 .i2a-truncate-3 {
@@ -283,7 +647,7 @@ h1, h2, h3, .h1, .h2, .h3 {
 }
 
 .i2a-demo-bar {
-  background: linear-gradient(90deg, $azul-100, #fff);
+  background: linear-gradient(90deg, $ciano-100, $azul-100);
   border-bottom: 1px solid $border-color;
   font-size: 0.8125rem;
   color: $azul-800;
@@ -292,5 +656,17 @@ h1, h2, h3, .h1, .h2, .h3 {
 // Faixa fina de gradiente usada como separador de seções
 .i2a-faixa {
   height: 3px;
-  background: linear-gradient(90deg, $azul-700, $azul-500, $azul-300);
+  @extend %gradiente-marca;
+}
+
+// Lista em que cada item é uma linha dentro de um cartão (publicações)
+.i2a-lista-cartao > li + li {
+  border-top: 1px solid $border-color;
+}
+
+// Título truncado nas tabelas do painel: acompanha a largura da tela para
+// que a coluna de ações não seja empurrada para fora do cartão
+.i2a-celula-titulo {
+  max-width: clamp(12rem, 26vw, 32rem);
+  vertical-align: bottom;
 }

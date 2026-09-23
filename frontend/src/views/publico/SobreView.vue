@@ -1,82 +1,85 @@
 <template>
-  <BContainer class="py-5">
-    <BRow class="g-5">
-      <BCol lg="7">
-        <p class="i2a-eyebrow mb-3">Sobre</p>
-        <h1 class="h2 fw-bold mb-4">
-          Um grupo de pesquisa em IA no interior do Maranhão
-        </h1>
+  <div>
+    <CabecalhoPagina
+      eyebrow="Sobre"
+      titulo="Um grupo de pesquisa em IA no interior do Maranhão"
+    />
 
-        <div class="fs-6 text-body-secondary d-grid gap-3">
-          <p class="mb-0">
-            O <strong class="text-body">I2A — Inteligência Artificial e Aplicações</strong> é um
-            grupo de pesquisa do {{ APP.instituicao }}, {{ APP.campus }}, dedicado ao estudo e à
-            aplicação de técnicas de aprendizagem de máquina a problemas reais da região.
-          </p>
-          <p class="mb-0">
-            O grupo nasceu dentro do curso de Análise e Desenvolvimento de Sistemas e articula
-            ensino, pesquisa e extensão: os mesmos projetos que geram publicações também formam
-            estudantes de iniciação científica e viram cursos abertos à comunidade.
-          </p>
-        </div>
+    <BContainer class="py-5">
+      <BRow class="g-5">
+        <BCol lg="7">
+          <div class="fs-6 text-body-secondary d-grid gap-3">
+            <p class="mb-0">
+              O <strong class="text-body">I2A — Inteligência Artificial e Aplicações</strong> é um
+              grupo de pesquisa do {{ APP.instituicao }}, {{ APP.campus }}, dedicado ao estudo e à
+              aplicação de técnicas de aprendizagem de máquina a problemas reais da região.
+            </p>
+            <p class="mb-0">
+              O grupo nasceu dentro do curso de Análise e Desenvolvimento de Sistemas e articula
+              ensino, pesquisa e extensão: os mesmos projetos que geram publicações também formam
+              estudantes de iniciação científica e viram cursos abertos à comunidade.
+            </p>
+          </div>
 
-        <hr class="i2a-rule my-5" />
+          <hr class="i2a-rule my-5" />
 
-        <SecaoTitulo titulo="Como trabalhamos" tag="h2" />
-        <BRow class="g-4">
-          <BCol sm="6" v-for="pilar in pilares" :key="pilar.titulo">
-            <h3 class="h6 fw-semibold mb-1">{{ pilar.titulo }}</h3>
-            <p class="small text-body-secondary mb-0">{{ pilar.texto }}</p>
-          </BCol>
-        </BRow>
-
-        <hr class="i2a-rule my-5" />
-
-        <SecaoTitulo titulo="Linhas de pesquisa" tag="h2" />
-        <CarregandoBloco v-if="carregando" />
-        <ul v-else class="list-unstyled d-grid gap-3 mb-0">
-          <li v-for="l in linhasLista" :key="l.id" class="border-bottom pb-3">
-            <p class="fw-semibold mb-1">{{ l.descricao }}</p>
-            <RouterLink
-              :to="{ name: 'pesquisadores', query: { linha: l.id } }"
-              class="i2a-meta text-decoration-none"
-            >
-              Ver pesquisadores da linha →
-            </RouterLink>
-          </li>
-        </ul>
-      </BCol>
-
-      <BCol lg="5">
-        <div class="i2a-surface p-4 mb-3">
-          <p class="i2a-eyebrow mb-3">O grupo em números</p>
-          <BRow class="g-3">
-            <BCol cols="6" v-for="n in numeros" :key="n.rotulo">
-              <p class="i2a-stat mb-1">{{ n.valor }}</p>
-              <p class="i2a-meta mb-0">{{ n.rotulo }}</p>
+          <SecaoTitulo titulo="Como trabalhamos" tag="h2" />
+          <BRow class="g-4">
+            <BCol sm="6" v-for="pilar in pilares" :key="pilar.titulo">
+              <h3 class="h6 fw-semibold mb-1">{{ pilar.titulo }}</h3>
+              <p class="small text-body-secondary mb-0">{{ pilar.texto }}</p>
             </BCol>
           </BRow>
-        </div>
 
-        <div class="i2a-surface p-4">
-          <p class="i2a-eyebrow mb-2">Quer fazer parte?</p>
-          <p class="small text-body-secondary">
-            O grupo recebe estudantes de graduação em iniciação científica, voluntariado e
-            projetos de extensão ao longo de todo o ano.
-          </p>
-          <RouterLink :to="{ name: 'participe' }" class="btn btn-sm btn-primary">
-            Ver oportunidades
-          </RouterLink>
-        </div>
-      </BCol>
-    </BRow>
-  </BContainer>
+          <hr class="i2a-rule my-5" />
+
+          <SecaoTitulo titulo="Linhas de pesquisa" tag="h2" />
+          <CarregandoBloco v-if="carregando" />
+          <ul v-else class="list-unstyled d-grid gap-3 mb-0">
+            <li v-for="l in linhasLista" :key="l.id" class="border-bottom pb-3">
+              <p class="fw-semibold mb-1">{{ l.descricao }}</p>
+              <RouterLink
+                :to="{ name: 'pesquisadores', query: { linha: l.id } }"
+                class="i2a-meta text-decoration-none"
+              >
+                Ver pesquisadores da linha →
+              </RouterLink>
+            </li>
+          </ul>
+        </BCol>
+
+        <BCol lg="5">
+          <div class="i2a-surface p-4 mb-3">
+            <p class="i2a-eyebrow mb-3">O grupo em números</p>
+            <BRow class="g-3">
+              <BCol cols="6" v-for="n in numeros" :key="n.rotulo">
+                <p class="i2a-stat mb-1">{{ n.valor }}</p>
+                <p class="i2a-meta mb-0">{{ n.rotulo }}</p>
+              </BCol>
+            </BRow>
+          </div>
+
+          <div class="i2a-surface p-4">
+            <p class="i2a-eyebrow mb-2">Quer fazer parte?</p>
+            <p class="small text-body-secondary">
+              O grupo recebe estudantes de graduação em iniciação científica, voluntariado e
+              projetos de extensão ao longo de todo o ano.
+            </p>
+            <RouterLink :to="{ name: 'participe' }" class="btn btn-sm btn-primary">
+              Ver oportunidades
+            </RouterLink>
+          </div>
+        </BCol>
+      </BRow>
+    </BContainer>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { BContainer, BRow, BCol } from 'bootstrap-vue-next';
 
+import CabecalhoPagina from '@/components/comum/CabecalhoPagina.vue';
 import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import { APP } from '@/config';

@@ -9,7 +9,7 @@
     :para-formulario="paraFormulario"
   >
     <template #cell(titulo)="{ item }">
-      <span class="d-inline-block text-truncate" style="max-width: 26rem">{{ item.titulo }}</span>
+      <span class="d-inline-block text-truncate i2a-celula-titulo">{{ item.titulo }}</span>
     </template>
 
     <template #cell(tipo)="{ item }">{{ TIPO_PRODUCAO[item.tipo] ?? '—' }}</template>

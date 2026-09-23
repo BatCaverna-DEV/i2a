@@ -1,41 +1,42 @@
 <template>
-  <BContainer class="py-5">
-    <SecaoTitulo
+  <div>
+    <CabecalhoPagina
       eyebrow="Formação"
       titulo="Cursos"
       descricao="Cursos, minicursos e oficinas ofertados pelo grupo à comunidade acadêmica e externa."
-      tag="h1"
     />
 
-    <BFormCheckbox v-model="somenteAbertos" switch class="mb-4" @update:model-value="carregar(1)">
-      Mostrar apenas cursos com inscrições abertas
-    </BFormCheckbox>
+    <BContainer class="py-5">
+      <BFormCheckbox v-model="somenteAbertos" switch class="mb-4" @update:model-value="carregar(1)">
+        Mostrar apenas cursos com inscrições abertas
+      </BFormCheckbox>
 
-    <CarregandoBloco v-if="carregando" />
-    <EstadoVazio v-else-if="!itens.length" icone="bi-mortarboard" titulo="Nenhum curso encontrado" />
+      <CarregandoBloco v-if="carregando" />
+      <EstadoVazio v-else-if="!itens.length" icone="bi-mortarboard" titulo="Nenhum curso encontrado" />
 
-    <BRow v-else class="g-3">
-      <BCol v-for="c in itens" :key="c.id" md="6" lg="4">
-        <CursoCard :curso="c" />
-      </BCol>
-    </BRow>
+      <BRow v-else class="g-3">
+        <BCol v-for="c in itens" :key="c.id" md="6" lg="4">
+          <CursoCard :curso="c" />
+        </BCol>
+      </BRow>
 
-    <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
-      <BPagination
-        v-model="pagina"
-        :total-rows="meta.total"
-        :per-page="meta.limit"
-        @update:model-value="carregar"
-      />
-    </div>
-  </BContainer>
+      <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
+        <BPagination
+          v-model="pagina"
+          :total-rows="meta.total"
+          :per-page="meta.limit"
+          @update:model-value="carregar"
+        />
+      </div>
+    </BContainer>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { BContainer, BRow, BCol, BFormCheckbox, BPagination } from 'bootstrap-vue-next';
 
-import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
+import CabecalhoPagina from '@/components/comum/CabecalhoPagina.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import CursoCard from '@/components/publico/CursoCard.vue';

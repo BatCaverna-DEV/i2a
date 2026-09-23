@@ -1,59 +1,69 @@
 <template>
-  <BContainer class="py-5">
-    <SecaoTitulo
+  <div>
+    <CabecalhoPagina
       eyebrow="Quem faz"
       titulo="Equipe"
       descricao="Professores, pesquisadores e estudantes vinculados ao grupo."
-      tag="h1"
     />
 
-    <BRow class="g-2 mb-4">
-      <BCol md="5">
-        <BFormInput
-          v-model="busca"
-          placeholder="Buscar por nome…"
-          debounce="400"
-          @update:model-value="carregar(1)"
+    <BContainer class="py-5">
+      <BRow class="g-2 mb-4">
+        <BCol md="5">
+          <BFormInput
+            v-model="busca"
+            placeholder="Buscar por nome…"
+            debounce="400"
+            @update:model-value="carregar(1)"
+          />
+        </BCol>
+        <BCol md="5">
+          <BFormSelect
+            v-model="linhaSelecionada"
+            :options="opcoesLinhas"
+            @update:model-value="carregar(1)"
+          />
+        </BCol>
+      </BRow>
+
+      <CarregandoBloco v-if="carregando" />
+
+      <EstadoVazio v-else-if="!itens.length" icone="bi-people" titulo="Nenhum pesquisador encontrado" />
+
+      <BRow v-else class="g-3">
+        <BCol v-for="p in itens" :key="p.id" md="6" lg="4">
+          <RouterLink
+            :to="{ name: 'pesquisador', params: { id: p.id } }"
+            class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
+          >
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <span class="i2a-avatar">{{ iniciais(p.nome) }}</span>
+              <div style="min-width: 0">
+                <h2 class="h6 fw-semibold mb-0">{{ p.nome }}</h2>
+                <p class="i2a-meta mb-0">
+                  {{ p.papel ?? (p.tipo === 2 ? 'Aluno' : 'Pesquisador') }}
+                </p>
+              </div>
+            </div>
+            <p class="mb-2">
+              <span class="i2a-selo">{{ p.linha?.descricao ?? 'Sem linha definida' }}</span>
+            </p>
+            <p v-if="p.resumo" class="small text-body-secondary i2a-truncate-3 mb-0">
+              {{ p.resumo }}
+            </p>
+          </RouterLink>
+        </BCol>
+      </BRow>
+
+      <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
+        <BPagination
+          v-model="pagina"
+          :total-rows="meta.total"
+          :per-page="meta.limit"
+          @update:model-value="carregar"
         />
-      </BCol>
-      <BCol md="5">
-        <BFormSelect
-          v-model="linhaSelecionada"
-          :options="opcoesLinhas"
-          @update:model-value="carregar(1)"
-        />
-      </BCol>
-    </BRow>
-
-    <CarregandoBloco v-if="carregando" />
-
-    <EstadoVazio v-else-if="!itens.length" icone="bi-people" titulo="Nenhum pesquisador encontrado" />
-
-    <BRow v-else class="g-3">
-      <BCol v-for="p in itens" :key="p.id" md="6" lg="4">
-        <RouterLink
-          :to="{ name: 'pesquisador', params: { id: p.id } }"
-          class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
-        >
-          <p v-if="p.papel" class="i2a-eyebrow mb-2">{{ p.papel }}</p>
-          <h2 class="h6 fw-semibold mb-1">{{ p.nome }}</h2>
-          <p class="i2a-meta mb-2">{{ p.linha?.descricao ?? 'Sem linha definida' }}</p>
-          <p v-if="p.resumo" class="small text-body-secondary i2a-truncate-3 mb-0">
-            {{ p.resumo }}
-          </p>
-        </RouterLink>
-      </BCol>
-    </BRow>
-
-    <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
-      <BPagination
-        v-model="pagina"
-        :total-rows="meta.total"
-        :per-page="meta.limit"
-        @update:model-value="carregar"
-      />
-    </div>
-  </BContainer>
+      </div>
+    </BContainer>
+  </div>
 </template>
 
 <script setup>
@@ -61,10 +71,11 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { BContainer, BRow, BCol, BFormInput, BFormSelect, BPagination } from 'bootstrap-vue-next';
 
-import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
+import CabecalhoPagina from '@/components/comum/CabecalhoPagina.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import { pesquisadores, linhas } from '@/services/publicoService';
+import { iniciais } from '@/utils/formatadores';
 
 const route = useRoute();
 

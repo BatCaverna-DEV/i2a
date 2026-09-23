@@ -16,6 +16,10 @@
             :to="{ name: cartao.rota }"
             class="i2a-card d-block h-100 p-4 text-decoration-none text-body"
           >
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <span class="i2a-icone" :class="cartao.cor"><i :class="`bi ${cartao.icone}`" /></span>
+              <i class="bi bi-arrow-up-right text-body-secondary" />
+            </div>
             <p class="i2a-stat mb-1">{{ cartao.valor }}</p>
             <p class="i2a-meta mb-0">{{ cartao.rotulo }}</p>
           </RouterLink>
@@ -41,7 +45,7 @@
                   :style="{
                     height: `${alturaBarra(linha.total)}px`,
                     width: '28px',
-                    background: 'linear-gradient(180deg, var(--i2a-azul-500), var(--i2a-azul-700))'
+                    background: 'linear-gradient(180deg, var(--i2a-ciano-400), var(--i2a-azul-600))'
                   }"
                   :title="`${linha.total} publicações em ${linha.ano}`"
                 />
@@ -60,9 +64,12 @@
                 v-for="atalho in atalhos"
                 :key="atalho.rota"
                 :to="{ name: atalho.rota }"
-                class="btn btn-outline-secondary btn-sm text-start"
+                class="btn btn-light border text-start d-flex align-items-center gap-3 py-2"
               >
-                <i :class="`bi ${atalho.icone} me-2`" />{{ atalho.rotulo }}
+                <span class="i2a-icone" :class="atalho.cor" style="width: 2.25rem; height: 2.25rem; font-size: 1rem">
+                  <i :class="`bi ${atalho.icone}`" />
+                </span>
+                <span class="small fw-semibold">{{ atalho.rotulo }}</span>
               </RouterLink>
             </div>
           </div>
@@ -87,17 +94,41 @@ const dados = ref(null);
 const carregando = ref(true);
 
 const cartoes = computed(() => [
-  { rotulo: 'Pesquisadores', valor: dados.value?.totalPesquisadores ?? 0, rota: 'admin-pesquisadores' },
-  { rotulo: 'Projetos', valor: dados.value?.totalProjetos ?? 0, rota: 'admin-projetos' },
-  { rotulo: 'Cursos', valor: dados.value?.totalCursos ?? 0, rota: 'admin-cursos' },
-  { rotulo: 'Publicações', valor: dados.value?.totalProducoes ?? 0, rota: 'admin-producoes' }
+  {
+    rotulo: 'Pesquisadores',
+    valor: dados.value?.totalPesquisadores ?? 0,
+    rota: 'admin-pesquisadores',
+    icone: 'bi-people',
+    cor: ''
+  },
+  {
+    rotulo: 'Projetos',
+    valor: dados.value?.totalProjetos ?? 0,
+    rota: 'admin-projetos',
+    icone: 'bi-kanban',
+    cor: 'i2a-icone--ciano'
+  },
+  {
+    rotulo: 'Cursos',
+    valor: dados.value?.totalCursos ?? 0,
+    rota: 'admin-cursos',
+    icone: 'bi-easel',
+    cor: 'i2a-icone--violeta'
+  },
+  {
+    rotulo: 'Publicações',
+    valor: dados.value?.totalProducoes ?? 0,
+    rota: 'admin-producoes',
+    icone: 'bi-journal-text',
+    cor: 'i2a-icone--ambar'
+  }
 ]);
 
 const atalhos = [
-  { rota: 'admin-pesquisadores', rotulo: 'Cadastrar pesquisador', icone: 'bi-person-plus' },
-  { rota: 'admin-projetos', rotulo: 'Cadastrar projeto', icone: 'bi-plus-square' },
-  { rota: 'admin-producoes', rotulo: 'Cadastrar publicação', icone: 'bi-journal-plus' },
-  { rota: 'admin-cursos', rotulo: 'Abrir inscrições de curso', icone: 'bi-calendar-plus' }
+  { rota: 'admin-pesquisadores', rotulo: 'Cadastrar pesquisador', icone: 'bi-person-plus', cor: '' },
+  { rota: 'admin-projetos', rotulo: 'Cadastrar projeto', icone: 'bi-plus-square', cor: 'i2a-icone--ciano' },
+  { rota: 'admin-producoes', rotulo: 'Cadastrar publicação', icone: 'bi-journal-plus', cor: 'i2a-icone--ambar' },
+  { rota: 'admin-cursos', rotulo: 'Abrir inscrições de curso', icone: 'bi-calendar-plus', cor: 'i2a-icone--violeta' }
 ];
 
 const maximo = computed(() =>

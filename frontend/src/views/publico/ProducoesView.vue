@@ -1,78 +1,79 @@
 <template>
-  <BContainer class="py-5">
-    <SecaoTitulo
+  <div>
+    <CabecalhoPagina
       eyebrow="Produção científica"
       titulo="Publicações"
       descricao="Artigos, capítulos, livros e softwares produzidos por membros do grupo."
-      tag="h1"
     />
 
-    <BRow class="g-2 mb-4">
-      <BCol md="5">
-        <BFormInput
-          v-model="busca"
-          placeholder="Buscar por título ou veículo…"
-          debounce="400"
-          @update:model-value="carregar(1)"
-        />
-      </BCol>
-      <BCol md="4">
-        <BFormSelect v-model="tipo" :options="opcoesTipo" @update:model-value="carregar(1)" />
-      </BCol>
-      <BCol md="3">
-        <BFormInput
-          v-model="ano"
-          type="number"
-          placeholder="Ano"
-          debounce="500"
-          @update:model-value="carregar(1)"
-        />
-      </BCol>
-    </BRow>
+    <BContainer class="py-5">
+      <BRow class="g-2 mb-4">
+        <BCol md="5">
+          <BFormInput
+            v-model="busca"
+            placeholder="Buscar por título ou veículo…"
+            debounce="400"
+            @update:model-value="carregar(1)"
+          />
+        </BCol>
+        <BCol md="4">
+          <BFormSelect v-model="tipo" :options="opcoesTipo" @update:model-value="carregar(1)" />
+        </BCol>
+        <BCol md="3">
+          <BFormInput
+            v-model="ano"
+            type="number"
+            placeholder="Ano"
+            debounce="500"
+            @update:model-value="carregar(1)"
+          />
+        </BCol>
+      </BRow>
 
-    <CarregandoBloco v-if="carregando" />
-    <EstadoVazio
-      v-else-if="!itens.length"
-      icone="bi-journal-text"
-      titulo="Nenhuma publicação encontrada"
-    />
-
-    <ul v-else class="list-unstyled d-grid gap-4 mb-0">
-      <li v-for="p in itens" :key="p.id" class="border-bottom pb-4">
-        <p class="fw-semibold mb-1">{{ p.titulo }}</p>
-
-        <p class="small text-body-secondary mb-1">
-          {{ p.autores?.map((a) => a.nome).join('; ') || 'Autoria não informada' }}
-        </p>
-
-        <p class="i2a-meta mb-0 d-flex flex-wrap gap-2 align-items-center">
-          <span class="i2a-selo">
-            {{ TIPO_PRODUCAO[p.tipo] ?? '—' }}
-          </span>
-          <span>{{ p.veiculo || '—' }} · {{ p.ano ?? 's/d' }}</span>
-          <span v-if="p.qualis">Qualis {{ p.qualis }}</span>
-          <a v-if="p.doi" :href="`https://doi.org/${p.doi}`" target="_blank" rel="noopener">DOI</a>
-          <a v-else-if="p.url" :href="p.url" target="_blank" rel="noopener">Acessar</a>
-        </p>
-      </li>
-    </ul>
-
-    <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
-      <BPagination
-        v-model="pagina"
-        :total-rows="meta.total"
-        :per-page="meta.limit"
-        @update:model-value="carregar"
+      <CarregandoBloco v-if="carregando" />
+      <EstadoVazio
+        v-else-if="!itens.length"
+        icone="bi-journal-text"
+        titulo="Nenhuma publicação encontrada"
       />
-    </div>
-  </BContainer>
+
+      <ul v-else class="i2a-painel i2a-lista-cartao list-unstyled mb-0">
+        <li v-for="p in itens" :key="p.id" class="p-4">
+          <p class="fw-semibold mb-1">{{ p.titulo }}</p>
+
+          <p class="small text-body-secondary mb-1">
+            {{ p.autores?.map((a) => a.nome).join('; ') || 'Autoria não informada' }}
+          </p>
+
+          <p class="i2a-meta mb-0 d-flex flex-wrap gap-2 align-items-center">
+            <span class="i2a-selo">
+              {{ TIPO_PRODUCAO[p.tipo] ?? '—' }}
+            </span>
+            <span>{{ p.veiculo || '—' }} · {{ p.ano ?? 's/d' }}</span>
+            <span v-if="p.qualis">Qualis {{ p.qualis }}</span>
+            <a v-if="p.doi" :href="`https://doi.org/${p.doi}`" target="_blank" rel="noopener">DOI</a>
+            <a v-else-if="p.url" :href="p.url" target="_blank" rel="noopener">Acessar</a>
+          </p>
+        </li>
+      </ul>
+
+      <div v-if="meta.totalPages > 1" class="d-flex justify-content-center mt-4">
+        <BPagination
+          v-model="pagina"
+          :total-rows="meta.total"
+          :per-page="meta.limit"
+          @update:model-value="carregar"
+        />
+      </div>
+    </BContainer>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { BContainer, BRow, BCol, BFormInput, BFormSelect, BPagination } from 'bootstrap-vue-next';
 
-import SecaoTitulo from '@/components/comum/SecaoTitulo.vue';
+import CabecalhoPagina from '@/components/comum/CabecalhoPagina.vue';
 import CarregandoBloco from '@/components/comum/CarregandoBloco.vue';
 import EstadoVazio from '@/components/comum/EstadoVazio.vue';
 import { producoes } from '@/services/publicoService';

@@ -3,8 +3,8 @@
     <BContainer>
       <nav class="navbar navbar-expand-lg p-0">
         <RouterLink :to="{ name: 'home' }" class="navbar-brand d-flex align-items-center gap-2">
-          <span class="fw-bold i2a-marca">{{ APP.sigla }}</span>
-          <span class="i2a-meta d-none d-sm-inline">Inteligência Artificial e Aplicações</span>
+          <span class="i2a-logo">{{ APP.sigla }}</span>
+          <span class="i2a-navbar-sub d-none d-sm-inline">Inteligência Artificial e Aplicações</span>
         </RouterLink>
 
         <button
@@ -13,7 +13,7 @@
           aria-label="Abrir menu"
           @click="aberto = !aberto"
         >
-          <i class="bi" :class="aberto ? 'bi-x-lg' : 'bi-list'" />
+          <i class="bi fs-4" :class="aberto ? 'bi-x-lg' : 'bi-list'" />
         </button>
 
         <div class="collapse navbar-collapse" :class="{ show: aberto }">
@@ -23,13 +23,13 @@
                 {{ item.rotulo }}
               </RouterLink>
             </li>
-            <li class="nav-item ms-lg-2 my-2 my-lg-0">
+            <li class="nav-item ms-lg-3 my-2 my-lg-0">
               <RouterLink
                 :to="{ name: 'admin-login' }"
-                class="btn btn-outline-primary btn-sm"
+                class="btn btn-ciano btn-sm px-3"
                 @click="aberto = false"
               >
-                Entrar
+                <i class="bi bi-box-arrow-in-right me-1" />Entrar
               </RouterLink>
             </li>
           </ul>

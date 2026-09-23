@@ -1,38 +1,37 @@
 <template>
-  <footer class="border-top mt-auto">
+  <footer class="i2a-rodape mt-auto">
     <BContainer class="py-5">
       <BRow class="gy-4">
         <BCol lg="5">
-          <p class="fw-bold mb-1">{{ APP.nome }}</p>
-          <p class="i2a-meta mb-3">{{ APP.descricao }}</p>
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="i2a-logo">{{ APP.sigla }}</span>
+            <span class="fw-semibold text-white">{{ APP.nome }}</span>
+          </div>
+          <p class="mb-3" style="max-width: 42ch">{{ APP.descricao }}</p>
           <p class="i2a-meta mb-0">
-            {{ APP.instituicao }} · {{ APP.campus }}
+            <i class="bi bi-geo-alt me-1" />{{ APP.instituicao }} · {{ APP.campus }}
           </p>
         </BCol>
 
         <BCol sm="6" lg="3">
-          <p class="i2a-eyebrow mb-2">Navegação</p>
-          <ul class="list-unstyled small mb-0 d-grid gap-1">
+          <p class="i2a-eyebrow mb-3">Navegação</p>
+          <ul class="list-unstyled small mb-0 d-grid gap-2">
             <li v-for="item in navegacao" :key="item.rota">
-              <RouterLink :to="{ name: item.rota }" class="link-dark text-decoration-none">
-                {{ item.rotulo }}
-              </RouterLink>
+              <RouterLink :to="{ name: item.rota }">{{ item.rotulo }}</RouterLink>
             </li>
           </ul>
         </BCol>
 
         <BCol sm="6" lg="4">
-          <p class="i2a-eyebrow mb-2">Contato</p>
-          <ul class="list-unstyled small mb-0 d-grid gap-1">
+          <p class="i2a-eyebrow mb-3">Contato</p>
+          <ul class="list-unstyled small mb-0 d-grid gap-2">
             <li>
-              <a :href="`mailto:${APP.email}`" class="link-dark text-decoration-none">
-                {{ APP.email }}
-              </a>
+              <a :href="`mailto:${APP.email}`"><i class="bi bi-envelope me-2" />{{ APP.email }}</a>
             </li>
-            <li class="i2a-meta">Campus Coelho Neto — Maranhão</li>
+            <li><i class="bi bi-pin-map me-2" />Campus Coelho Neto — Maranhão</li>
             <li>
-              <RouterLink :to="{ name: 'participe' }" class="link-dark text-decoration-none">
-                Oportunidades abertas
+              <RouterLink :to="{ name: 'participe' }">
+                <i class="bi bi-stars me-2" />Oportunidades abertas
               </RouterLink>
             </li>
           </ul>
@@ -43,8 +42,8 @@
 
       <div class="d-flex flex-wrap justify-content-between gap-2 i2a-meta">
         <span>© {{ ano }} {{ APP.nome }}</span>
-        <RouterLink :to="{ name: 'admin-login' }" class="link-secondary text-decoration-none">
-          Área restrita
+        <RouterLink :to="{ name: 'admin-login' }">
+          <i class="bi bi-lock me-1" />Área restrita
         </RouterLink>
       </div>
     </BContainer>

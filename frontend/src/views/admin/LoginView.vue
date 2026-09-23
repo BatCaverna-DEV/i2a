@@ -1,5 +1,5 @@
 <template>
-  <div class="min-vh-100 d-flex flex-column">
+  <div class="i2a-login-fundo d-flex flex-column">
     <BarraDemo />
 
     <div class="flex-grow-1 d-flex align-items-center py-5">
@@ -7,11 +7,12 @@
         <BRow class="justify-content-center">
           <BCol md="8" lg="5" xl="4">
             <div class="text-center mb-4">
-              <p class="fw-bold h4 i2a-marca mb-1">{{ APP.sigla }}</p>
-              <p class="i2a-meta mb-0">Área administrativa</p>
+              <span class="i2a-logo fs-4 px-3 py-2 mb-3">{{ APP.sigla }}</span>
+              <h1 class="h4 fw-bold mb-1">Área administrativa</h1>
+              <p class="i2a-meta mb-0">{{ APP.nome }}</p>
             </div>
 
-            <div class="i2a-card i2a-card--estatico p-4 p-lg-5">
+            <div class="i2a-painel p-4 p-lg-5 text-body">
               <p class="text-center text-body-secondary small mb-4">
                 O acesso é feito com a sua conta Google institucional ou pessoal,
                 desde que ela tenha sido cadastrada pela coordenação do grupo.
@@ -36,7 +37,7 @@
               </p>
             </div>
 
-            <p class="text-center i2a-meta mt-3 mb-0">
+            <p class="text-center i2a-meta mt-4 mb-0">
               <RouterLink :to="{ name: 'home' }" class="text-decoration-none">
                 ← Voltar ao site
               </RouterLink>

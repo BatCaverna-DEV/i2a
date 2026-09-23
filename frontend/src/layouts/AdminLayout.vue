@@ -6,18 +6,18 @@
       <div class="container-fluid px-3">
         <nav class="navbar p-0 py-2">
           <RouterLink :to="{ name: 'admin-dashboard' }" class="navbar-brand d-flex gap-2 align-items-center">
-            <span class="fw-bold">{{ APP.sigla }}</span>
-            <span class="i2a-meta">Administração</span>
+            <span class="i2a-logo">{{ APP.sigla }}</span>
+            <span class="i2a-navbar-sub">Administração</span>
           </RouterLink>
 
           <div class="d-flex align-items-center gap-3">
-            <RouterLink :to="{ name: 'home' }" class="i2a-meta text-decoration-none d-none d-sm-inline">
+            <RouterLink :to="{ name: 'home' }" class="i2a-navbar-sub text-decoration-none d-none d-sm-inline">
               Ver site <i class="bi bi-box-arrow-up-right ms-1" />
             </RouterLink>
 
             <BDropdown
               :text="auth.usuario?.username ?? 'Conta'"
-              variant="outline-secondary"
+              variant="outline-light"
               size="sm"
               end
             >
@@ -33,7 +33,7 @@
     <div class="d-flex flex-grow-1">
       <AdminSidebar class="d-none d-lg-block flex-shrink-0" style="width: 240px" />
 
-      <main class="flex-grow-1 p-3 p-lg-4" style="min-width: 0">
+      <main class="i2a-admin-main flex-grow-1 p-3 p-lg-4" style="min-width: 0">
         <RouterView />
       </main>
     </div>

@@ -93,3 +93,12 @@ export function inscricoesAbertas(curso) {
     agora <= new Date(curso.inscricoes_fim).getTime()
   );
 }
+
+/** Iniciais para o avatar: primeira letra do primeiro e do último nome. */
+export function iniciais(nome) {
+  const partes = String(nome ?? '').trim().split(/\s+/).filter(Boolean);
+  if (!partes.length) return '?';
+  const primeira = partes[0][0];
+  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+  return (primeira + ultima).toUpperCase();
+}
