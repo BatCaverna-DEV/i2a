@@ -13,17 +13,41 @@ import {
   Titulacao,
   Curso,
   Projeto,
-  Producao
+  Producao,
+  CATEGORIA_USUARIO
 } from '../models/index.js';
 import { STATUS_PROJETO } from '../models/Projeto.js';
 
-/** GET /publico/linhas — linhas de pesquisa com a contagem de pesquisadores. */
+/**
+ * Filtro dos números públicos: quem tem conta de Administrador não entra na
+ * contagem de pesquisadores. Pesquisadores sem conta de acesso continuam
+ * contando.
+ */
+const naoAdministrador = {
+  id: {
+    [Op.notIn]: literal(
+      `(SELECT pesquisador_id FROM usuarios
+         WHERE categoria = ${CATEGORIA_USUARIO.ADMINISTRADOR} AND pesquisador_id IS NOT NULL)`
+    )
+  }
+};
+
+/** GET /publico/linhas — linhas de pesquisa com a contagem de pesquisadores (sem administradores). */
 export const linhas = asyncHandler(async (req, res) => {
   const registros = await Linha.findAll({
     attributes: {
       include: [[fn('COUNT', col('pesquisadores.id')), 'total_pesquisadores']]
     },
-    include: [{ model: Pesquisador, as: 'pesquisadores', attributes: [] }],
+    // required: false mantém as linhas sem ninguém; o where vai para o ON do LEFT JOIN
+    include: [
+      {
+        model: Pesquisador,
+        as: 'pesquisadores',
+        attributes: [],
+        where: naoAdministrador,
+        required: false
+      }
+    ],
     group: ['Linha.id'],
     order: [['descricao', 'ASC']]
   });
@@ -162,11 +186,11 @@ export const producoes = asyncHandler(async (req, res) => {
   res.json(montarResposta({ rows, count, page, limit }));
 });
 
-/** GET /publico/estatisticas — números exibidos na home. */
+/** GET /publico/estatisticas — números exibidos na home e no painel (pesquisadores sem administradores). */
 export const estatisticas = asyncHandler(async (req, res) => {
   const [totalPesquisadores, totalProjetos, totalCursos, totalProducoes, totalLinhas] =
     await Promise.all([
-      Pesquisador.count(),
+      Pesquisador.count({ where: naoAdministrador }),
       Projeto.count(),
       Curso.count(),
       Producao.count(),

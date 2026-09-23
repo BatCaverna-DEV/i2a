@@ -69,6 +69,12 @@ function aplicarOrientandos(equipe, ids) {
   return [...mantidos, ...novos];
 }
 
+/** Espelha a API: quem tem conta de Administrador não conta como pesquisador. */
+function ehAdministrador(pesquisadorId) {
+  return dados.usuarios.some((u) => u.pesquisador_id === pesquisadorId && u.categoria === 1);
+}
+const pesquisadoresContados = () => dados.pesquisadores.filter((p) => !ehAdministrador(p.id));
+
 function inscricoesAbertas(curso) {
   if (!curso.inscricoes_inicio || !curso.inscricoes_fim) return false;
   const agora = Date.now();
@@ -87,7 +93,7 @@ export const publico = {
       if (prod.ano) porAno[prod.ano] = (porAno[prod.ano] ?? 0) + 1;
     }
     return {
-      totalPesquisadores: dados.pesquisadores.length,
+      totalPesquisadores: pesquisadoresContados().length,
       totalProjetos: dados.projetos.length,
       totalCursos: dados.cursos.length,
       totalProducoes: dados.producoes.length,
@@ -100,7 +106,15 @@ export const publico = {
 
   async linhas() {
     await atraso();
-    return { data: [...dados.linhas].sort((a, b) => a.descricao.localeCompare(b.descricao)) };
+    const contados = pesquisadoresContados();
+    return {
+      data: dados.linhas
+        .map((l) => ({
+          ...l,
+          total_pesquisadores: contados.filter((p) => p.linhas_id === l.id).length
+        }))
+        .sort((a, b) => a.descricao.localeCompare(b.descricao))
+    };
   },
 
   async pesquisadores(params = {}) {
