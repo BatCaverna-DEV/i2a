@@ -51,6 +51,14 @@ const Pesquisador = sequelize.define(
       type: DataTypes.STRING(20),
       allowNull: true
     },
+    lattes: {
+      // link do currículo na Plataforma Lattes (ex.: http://lattes.cnpq.br/1234567890123456)
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      validate: {
+        isUrl: { args: { protocols: ['http', 'https'], require_protocol: true }, msg: 'Link do Lattes inválido.' }
+      }
+    },
     tipo: {
       type: DataTypes.TINYINT,
       allowNull: false,

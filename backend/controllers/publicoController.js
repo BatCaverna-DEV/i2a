@@ -77,7 +77,7 @@ export const pesquisadores = asyncHandler(async (req, res) => {
 /** GET /publico/pesquisadores/:id — perfil público do pesquisador. */
 export const pesquisador = asyncHandler(async (req, res) => {
   const registro = await Pesquisador.findByPk(req.params.id, {
-    attributes: ['id', 'nome', 'email', 'tipo'],
+    attributes: ['id', 'nome', 'email', 'tipo', 'lattes'],
     include: [
       { model: Linha, as: 'linha', attributes: ['id', 'descricao'] },
       { model: Titulacao, as: 'titulacoes', attributes: ['titulo', 'instituicao', 'ano'] },

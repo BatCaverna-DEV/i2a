@@ -9,6 +9,20 @@ export const linhaSchema = z.object({
 });
 
 /* ----------------------- pesquisador ------------------------ */
+// Link do currículo Lattes. Só http(s): o valor vira href na página pública,
+// e um "javascript:" ali seria executado no navegador de quem clicar.
+// Campo vazio no formulário vira null.
+const linkLattes = z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() === '' ? null : typeof v === 'string' ? v.trim() : v),
+  z
+    .string()
+    .max(255)
+    .url('Link do Lattes inválido.')
+    .regex(/^https?:\/\//i, 'O link do Lattes deve começar com http:// ou https://.')
+    .nullable()
+    .optional()
+);
+
 // `categoria` define o tipo de usuário criado junto com o pesquisador:
 // 1 Administrador · 2 Pesquisador · 3 Orientando
 export const pesquisadorSchema = z.object({
@@ -16,6 +30,7 @@ export const pesquisadorSchema = z.object({
   email: z.string().email('E-mail inválido.').max(100),
   matricula: opcional(z.string().max(20)),
   linhas_id: opcional(z.string().uuid('Identificador inválido.')),
+  lattes: linkLattes,
   // 1 Pesquisador · 2 Aluno; se omitido, segue a categoria (Orientando → Aluno)
   tipo: z.coerce
     .number()

@@ -27,6 +27,13 @@
       <span v-else class="i2a-meta">sem conta</span>
     </template>
 
+    <template #cell(lattes)="{ item }">
+      <a v-if="item.lattes" :href="item.lattes" target="_blank" rel="noopener" title="Abrir currículo Lattes">
+        <i class="bi bi-box-arrow-up-right" />
+      </a>
+      <span v-else class="i2a-meta">—</span>
+    </template>
+
     <template #cell(titulacoes)="{ item }">
       {{ item.titulacoes?.length ?? 0 }}
     </template>
@@ -60,6 +67,21 @@
             description="É também o e-mail da conta Google usada para entrar no sistema."
           >
             <BFormInput id="email" v-model="form.email" type="email" required maxlength="100" />
+          </BFormGroup>
+        </BCol>
+        <BCol cols="12">
+          <BFormGroup
+            label="Currículo Lattes"
+            label-for="lattes"
+            description="Link do currículo na Plataforma Lattes. Aparece no perfil público."
+          >
+            <BFormInput
+              id="lattes"
+              v-model="form.lattes"
+              type="url"
+              maxlength="255"
+              placeholder="http://lattes.cnpq.br/0000000000000000"
+            />
           </BFormGroup>
         </BCol>
         <BCol cols="12">
@@ -124,6 +146,7 @@ const campos = [
   { key: 'tipo', label: 'Tipo' },
   { key: 'linha', label: 'Linha' },
   { key: 'acesso', label: 'Tipo de usuário' },
+  { key: 'lattes', label: 'Lattes' },
   { key: 'titulacoes', label: 'Titulações' }
 ];
 
@@ -156,6 +179,7 @@ const formularioPadrao = () => ({
   nome: '',
   email: '',
   matricula: '',
+  lattes: '',
   linhas_id: null,
   categoria: auth.ehAdmin ? CATEGORIA.PESQUISADOR : CATEGORIA.ORIENTANDO,
   tipo: auth.ehAdmin ? TIPO.PESQUISADOR : TIPO.ALUNO
@@ -165,6 +189,7 @@ const paraFormulario = (item) => ({
   nome: item.nome,
   email: item.email,
   matricula: item.matricula ?? '',
+  lattes: item.lattes ?? '',
   linhas_id: item.linhas_id ?? null,
   categoria: conta(item)?.categoria ?? CATEGORIA.ORIENTANDO,
   tipo: item.tipo ?? TIPO.PESQUISADOR

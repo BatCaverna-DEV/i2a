@@ -14,7 +14,8 @@
     "db:google": "node helpers/migrar-google.js",
     "db:papeis": "node helpers/migrar-papeis.js",
     "db:tipo": "node helpers/migrar-tipo-pesquisador.js",
-    "db:ano-projeto": "node helpers/migrar-ano-projeto.js"
+    "db:ano-projeto": "node helpers/migrar-ano-projeto.js",
+    "db:lattes": "node helpers/migrar-lattes-pesquisador.js"
   },
   "keywords": [
     "i2a",

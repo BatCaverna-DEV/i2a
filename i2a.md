@@ -37,8 +37,8 @@ cd frontend && npm install && npm run dev
 ```
 
 Scripts extras do backend: `npm run db:google`, `npm run db:papeis`, `npm run db:tipo` e
-`npm run db:ano-projeto` (migrações pontuais: login Google, papéis, `pesquisador.tipo` e
-`projetos.ano`). Coluna nova no model exige rodar a migração ANTES de reiniciar a API. Não há migrations versionadas: o
+`npm run db:ano-projeto`, `npm run db:lattes` (migrações pontuais: login Google, papéis,
+`pesquisador.tipo`, `projetos.ano` e `pesquisador.lattes`). Coluna nova no model exige rodar a migração ANTES de reiniciar a API. Não há migrations versionadas: o
 schema vem do `sequelize.sync` (`DB_SYNC`, `DB_SYNC_ALTER`).
 
 `VITE_USE_MOCKS=true` faz o frontend rodar sem backend (dados em `src/mocks/`, login
@@ -81,6 +81,7 @@ Códigos numéricos (constantes exportadas por `models/index.js`; espelho no fro
 - `pesquisador.tipo`: 1 Pesquisador · 2 Aluno (orientando). É o *que a pessoa é*; a
   `categoria` é *o que a conta pode fazer*. No cadastro, sem `tipo` explícito, segue a
   categoria (Orientando → Aluno); admin mudar a categoria recalcula o tipo.
+- `pesquisador.lattes`: link do currículo (só http/https — vira href no perfil público).
 - `usuarios.categoria`: 1 Administrador · 2 Pesquisador · 3 Orientando
 - `usuarios.status`: 0 Inativo · 1 Ativo · 2 Bloqueado
 - `projetos.status`: 0 Em elaboração · 1 Em andamento · 2 Concluído · 3 Cancelado

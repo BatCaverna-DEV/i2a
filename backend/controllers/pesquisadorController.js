@@ -116,7 +116,7 @@ function validarCategoriaPermitida(autor, categoria) {
  * órfão no banco.
  */
 export const criar = asyncHandler(async (req, res) => {
-  const { nome, email, matricula, linhas_id, tipo, categoria } = req.body;
+  const { nome, email, matricula, lattes, linhas_id, tipo, categoria } = req.body;
 
   validarCategoriaPermitida(req.usuario, categoria);
 
@@ -133,6 +133,7 @@ export const criar = asyncHandler(async (req, res) => {
         nome,
         email: emailNormalizado,
         matricula,
+        lattes,
         linhas_id,
         tipo: tipo ?? tipoPelaCategoria(categoria)
       },
@@ -171,7 +172,7 @@ export const atualizar = asyncHandler(async (req, res) => {
   // pesquisador só edita o próprio cadastro (o dono aqui é o próprio id)
   exigirPosse(req.usuario, { pesquisador_id: pesquisador.id }, 'pesquisador_id');
 
-  const { nome, email, matricula, linhas_id, tipo, categoria } = req.body;
+  const { nome, email, matricula, lattes, linhas_id, tipo, categoria } = req.body;
   const emailNormalizado = email ? email.trim().toLowerCase() : null;
 
   if (categoria !== undefined && !ehAdmin(req.usuario)) {
@@ -184,6 +185,7 @@ export const atualizar = asyncHandler(async (req, res) => {
         ...(nome !== undefined && { nome }),
         ...(emailNormalizado && { email: emailNormalizado }),
         ...(matricula !== undefined && { matricula }),
+        ...(lattes !== undefined && { lattes }),
         ...(linhas_id !== undefined && { linhas_id }),
         // tipo explícito vence; sem ele, mudar a categoria recalcula o tipo
         ...(tipo !== undefined

@@ -136,7 +136,7 @@ aplicação e, no MariaDB, a coluna vira `CHAR(36) BINARY`. Nenhuma tabela usa
 | Tabela | Campos principais | Relacionamentos |
 |---|---|---|
 | `linhas` | `descricao` | 1:N com `pesquisador` |
-| `pesquisador` | `nome`, `email` (único), `matricula`, `tipo`, `linhas_id` | núcleo do modelo |
+| `pesquisador` | `nome`, `email` (único), `matricula`, `lattes` (link, opcional), `tipo`, `linhas_id` | núcleo do modelo |
 | `usuarios` | `email` (único, autoriza o login), `username`, `google_sub`, `categoria`, `status` | N:1 com `pesquisador` |
 | `titulacao` | `titulo`, `instituicao`, `ano` | N:1 com `pesquisador` |
 | `cursos` | `titulo` VARCHAR(255), `resumo` TEXT, `inicio`, `inscricoes_inicio`, `inscricoes_fim` | N:1 com `pesquisador` (responsável) |
